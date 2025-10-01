@@ -41,22 +41,30 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Authenticate user and return JWT token")
-    public ResponseEntity<JwtAuthenticationResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         log.info("Login attempt for email: {}", loginRequest.getEmail());
-        
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail(),
-                loginRequest.getPassword()
-            )
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword()
+                )
+            );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
-        
-        log.info("User {} logged in successfully", loginRequest.getEmail());
-        
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, "Bearer"));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateToken(authentication);
+
+            log.info("User {} logged in successfully", loginRequest.getEmail());
+            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, "Bearer"));
+        } catch (org.springframework.security.core.AuthenticationException ex) {
+            log.warn("Authentication failed for email {}: {}", loginRequest.getEmail(), ex.getMessage());
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid email or password"));
+        } catch (Exception ex) {
+            log.error("Unexpected error during login for email {}", loginRequest.getEmail(), ex);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Login failed due to server error: " + ex.getClass().getSimpleName()));
+        }
     }
 
     @PostMapping("/register")
