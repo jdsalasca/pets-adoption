@@ -3,6 +3,13 @@ package com.petfriendly.backend.controller;
 import com.petfriendly.backend.entity.User;
 import com.petfriendly.backend.enums.Role;
 import com.petfriendly.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +26,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
@@ -29,6 +34,13 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
+    @Operation(summary = "Create user", description = "Creates a new user. Requires SUPER_ADMIN role.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "User created",
+                    content = @Content(schema = @Schema(implementation = User.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "409", description = "Email already exists")
+    })
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         log.info("Creating new user with email: {}", user.getEmail());
         User createdUser = userService.createUser(user);
@@ -36,6 +48,7 @@ public class UserController {
     }
 
     @GetMapping
+    @Operation(summary = "List users", description = "Returns all platform users. Requires SUPER_ADMIN role.")
     public ResponseEntity<List<User>> getAllUsers() {
         log.info("Getting all users");
         return ResponseEntity.ok(userService.findAll());

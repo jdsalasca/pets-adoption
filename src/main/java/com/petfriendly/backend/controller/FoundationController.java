@@ -2,6 +2,8 @@ package com.petfriendly.backend.controller;
 
 import com.petfriendly.backend.entity.Foundation;
 import com.petfriendly.backend.service.FoundationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +33,7 @@ public class FoundationController {
      * POST /api/v1/foundations
      */
     @PostMapping
+    @Operation(summary = "Create foundation", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Foundation> createFoundation(@Valid @RequestBody Foundation foundation) {
         log.info("Creating new foundation: {}", foundation.getName());
         Foundation createdFoundation = foundationService.createFoundation(foundation);
@@ -188,6 +191,7 @@ public class FoundationController {
      * PUT /api/v1/foundations/{id}
      */
     @PutMapping("/{id}")
+    @Operation(summary = "Update foundation", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Foundation> updateFoundation(@PathVariable UUID id, @Valid @RequestBody Foundation foundation) {
         log.info("Updating foundation with ID: {}", id);
         try {
@@ -204,6 +208,7 @@ public class FoundationController {
      * PUT /api/v1/foundations/{id}/activate
      */
     @PutMapping("/{id}/activate")
+    @Operation(summary = "Activate foundation", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Foundation> activateFoundation(@PathVariable UUID id) {
         log.info("Activating foundation with ID: {}", id);
         try {
@@ -220,6 +225,7 @@ public class FoundationController {
      * PUT /api/v1/foundations/{id}/deactivate
      */
     @PutMapping("/{id}/deactivate")
+    @Operation(summary = "Deactivate foundation", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Foundation> deactivateFoundation(@PathVariable UUID id) {
         log.info("Deactivating foundation with ID: {}", id);
         try {
@@ -236,6 +242,7 @@ public class FoundationController {
      * DELETE /api/v1/foundations/{id}
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete foundation", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> deleteFoundation(@PathVariable UUID id) {
         log.info("Deleting foundation with ID: {}", id);
         try {

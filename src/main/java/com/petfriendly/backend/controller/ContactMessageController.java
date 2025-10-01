@@ -2,6 +2,8 @@ package com.petfriendly.backend.controller;
 
 import com.petfriendly.backend.entity.ContactMessage;
 import com.petfriendly.backend.service.ContactMessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/contact-messages")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@SecurityRequirement(name = "bearerAuth")
 public class ContactMessageController {
 
     private static final Logger log = LoggerFactory.getLogger(ContactMessageController.class);
@@ -32,6 +35,7 @@ public class ContactMessageController {
      * POST /api/v1/contact-messages
      */
     @PostMapping
+    @Operation(summary = "Create contact message", description = "Public endpoint to send a message to a foundation.", security = {})
     public ResponseEntity<ContactMessage> createContactMessage(@Valid @RequestBody ContactMessage contactMessage) {
         log.info("Creating new contact message from: {} to foundation ID: {}", 
                 contactMessage.getSenderEmail(), contactMessage.getFoundation().getId());
@@ -44,6 +48,7 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages
      */
     @GetMapping
+    @Operation(summary = "List contact messages", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<ContactMessage>> getAllContactMessages() {
         log.info("Getting all contact messages");
         List<ContactMessage> messages = contactMessageService.findAll();
@@ -55,6 +60,7 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/page
      */
     @GetMapping("/page")
+    @Operation(summary = "List contact messages (paged)", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<ContactMessage>> getAllContactMessagesWithPagination(Pageable pageable) {
         log.info("Getting all contact messages with pagination");
         Page<ContactMessage> messages = contactMessageService.findAll(pageable);
@@ -66,6 +72,7 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/{id}
      */
     @GetMapping("/{id}")
+    @Operation(summary = "Get contact message", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<ContactMessage> getContactMessageById(@PathVariable UUID id) {
         log.info("Getting contact message by ID: {}", id);
         return contactMessageService.findById(id)

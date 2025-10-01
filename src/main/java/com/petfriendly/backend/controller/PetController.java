@@ -4,6 +4,8 @@ import com.petfriendly.backend.entity.Pet;
 import com.petfriendly.backend.entity.PetSpecies;
 import com.petfriendly.backend.entity.PetStatus;
 import com.petfriendly.backend.service.PetService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,7 @@ private final PetService petService;
      * POST /api/v1/pets
      */
     @PostMapping
+    @Operation(summary = "Create a pet", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Pet> createPet(@Valid @RequestBody Pet pet) {
         log.info("Creating new pet: {}", pet.getName());
         Pet createdPet = petService.createPet(pet);
@@ -255,6 +258,7 @@ private final PetService petService;
      * PUT /api/v1/pets/{id}
      */
     @PutMapping("/{id}")
+    @Operation(summary = "Update pet", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Pet> updatePet(@PathVariable UUID id, @Valid @RequestBody Pet pet) {
         log.info("Updating pet with ID: {}", id);
         try {
@@ -271,6 +275,7 @@ private final PetService petService;
      * PUT /api/v1/pets/{id}/status
      */
     @PutMapping("/{id}/status")
+    @Operation(summary = "Update pet status", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Pet> updatePetStatus(@PathVariable UUID id, @RequestBody PetStatus status) {
         log.info("Updating status for pet ID {} to: {}", id, status);
         try {
@@ -287,6 +292,7 @@ private final PetService petService;
      * PUT /api/v1/pets/{id}/adopt
      */
     @PutMapping("/{id}/adopt")
+    @Operation(summary = "Mark pet as adopted", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Pet> adoptPet(@PathVariable UUID id) {
         log.info("Marking pet as adopted: {}", id);
         try {
@@ -303,6 +309,7 @@ private final PetService petService;
      * PUT /api/v1/pets/{id}/available
      */
     @PutMapping("/{id}/available")
+    @Operation(summary = "Mark pet as available", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Pet> markPetAsAvailable(@PathVariable UUID id) {
         log.info("Marking pet as available: {}", id);
         try {
@@ -319,6 +326,7 @@ private final PetService petService;
      * DELETE /api/v1/pets/{id}
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete pet", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> deletePet(@PathVariable UUID id) {
         log.info("Deleting pet with ID: {}", id);
         try {

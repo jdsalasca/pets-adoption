@@ -2,6 +2,8 @@ package com.petfriendly.backend.controller;
 
 import com.petfriendly.backend.entity.PetImage;
 import com.petfriendly.backend.service.PetImageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ public class PetImageController {
      * POST /api/v1/pet-images
      */
     @PostMapping
+    @Operation(summary = "Create pet image", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PetImage> createPetImage(@Valid @RequestBody PetImage petImage) {
         log.info("Creating new pet image for pet ID: {}", petImage.getPet().getId());
         PetImage createdPetImage = petImageService.createPetImage(petImage);
@@ -159,6 +162,7 @@ public class PetImageController {
      * PUT /api/v1/pet-images/{id}
      */
     @PutMapping("/{id}")
+    @Operation(summary = "Update pet image", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PetImage> updatePetImage(@PathVariable UUID id, @Valid @RequestBody PetImage petImage) {
         log.info("Updating pet image with ID: {}", id);
         try {
@@ -175,6 +179,7 @@ public class PetImageController {
      * PUT /api/v1/pet-images/{id}/set-primary
      */
     @PutMapping("/{id}/set-primary")
+    @Operation(summary = "Set primary image", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PetImage> setPrimaryImage(@PathVariable UUID id) {
         log.info("Setting pet image as primary: {}", id);
         try {
@@ -191,6 +196,7 @@ public class PetImageController {
      * PUT /api/v1/pet-images/{id}/remove-primary
      */
     @PutMapping("/{id}/remove-primary")
+    @Operation(summary = "Remove primary flag", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PetImage> removePrimaryStatus(@PathVariable UUID id) {
         log.info("Removing primary status from pet image: {}", id);
         try {
@@ -207,6 +213,7 @@ public class PetImageController {
      * DELETE /api/v1/pet-images/{id}
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete pet image", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> deletePetImage(@PathVariable UUID id) {
         log.info("Deleting pet image with ID: {}", id);
         try {
@@ -223,6 +230,7 @@ public class PetImageController {
      * DELETE /api/v1/pet-images/pet/{petId}
      */
     @DeleteMapping("/pet/{petId}")
+    @Operation(summary = "Delete images for pet", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> deleteAllPetImages(@PathVariable UUID petId) {
         log.info("Deleting all images for pet ID: {}", petId);
         try {

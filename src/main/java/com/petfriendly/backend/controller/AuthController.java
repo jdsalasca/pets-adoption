@@ -9,6 +9,10 @@ import com.petfriendly.backend.enums.Role;
 import com.petfriendly.backend.security.JwtTokenProvider;
 import com.petfriendly.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +45,12 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Authenticate user and return JWT token")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Authentication succeeded",
+            content = @Content(schema = @Schema(implementation = JwtAuthenticationResponse.class))),
+        @ApiResponse(responseCode = "401", description = "Invalid credentials",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         log.info("Login attempt for email: {}", loginRequest.getEmail());
         try {
@@ -69,6 +79,14 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "User registration", description = "Register a new user account")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "User registered",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Validation problem",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+        @ApiResponse(responseCode = "409", description = "Email already taken",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         log.info("Registration attempt for email: {}", registerRequest.getEmail());
         
@@ -99,6 +117,14 @@ public class AuthController {
 
     @PostMapping("/register/foundation")
     @Operation(summary = "Foundation registration", description = "Register a new foundation account")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Foundation registered",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Validation problem",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+        @ApiResponse(responseCode = "409", description = "Email already taken",
+            content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     public ResponseEntity<MessageResponse> registerFoundation(@Valid @RequestBody RegisterRequest registerRequest) {
         log.info("Foundation registration attempt for email: {}", registerRequest.getEmail());
         

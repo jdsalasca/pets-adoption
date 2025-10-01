@@ -1,6 +1,7 @@
 package com.petfriendly.backend.controller;
 
 import com.petfriendly.backend.dto.request.AdoptionRequestCreateRequest;
+import com.petfriendly.backend.dto.response.MessageResponse;
 import com.petfriendly.backend.entity.AdoptionRequest;
 import com.petfriendly.backend.entity.AdoptionRequestStatus;
 import com.petfriendly.backend.entity.Pet;
@@ -8,6 +9,12 @@ import com.petfriendly.backend.entity.User;
 import com.petfriendly.backend.service.AdoptionRequestService;
 import com.petfriendly.backend.service.PetService;
 import com.petfriendly.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +38,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
+@SecurityRequirement(name = "bearerAuth")
 public class AdoptionRequestController {
 
     private final AdoptionRequestService adoptionRequestService;
@@ -42,6 +50,20 @@ public class AdoptionRequestController {
      * POST /api/v1/adoption-requests
      */
     @PostMapping
+    @Operation(
+            summary = "Submit adoption request",
+            description = "Creates a new adoption request for the authenticated user and the provided pet identifier."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Adoption request created",
+                    content = @Content(schema = @Schema(implementation = AdoptionRequest.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid JWT",
+                    content = @Content(schema = @Schema(implementation = MessageResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Pet not found",
+                    content = @Content(schema = @Schema(implementation = MessageResponse.class)))
+    })
     public ResponseEntity<AdoptionRequest> createAdoptionRequest(@Valid @RequestBody AdoptionRequestCreateRequest request,
                                                                  @AuthenticationPrincipal UserDetails currentUser) {
         if (currentUser == null) {

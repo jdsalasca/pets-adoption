@@ -125,6 +125,7 @@ public class SecurityConfig {
                 
                 // Health check endpoints
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers("/actuator/**").hasRole("SUPER_ADMIN")
                 
                 // User endpoints - authenticated users
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/profile").authenticated()

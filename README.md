@@ -1,14 +1,29 @@
 # PetFriendly Backend
 
-PetFriendly Backend is a Spring Boot service that powers the PetFriendly adoption platform. It exposes RESTful APIs for managing pets, foundations, users, adoption requests, and contact messages, with JWT-based authentication and database migrations via Flyway.
+PetFriendly Backend is the Spring Boot API behind the PetFriendly adoption platform. It exposes RESTful endpoints for pets, foundations, users, adoption requests, contact messages and reporting, secured with JWT and backed by Flyway-managed PostgreSQL schemas.
+
+![Sample Pet](https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=960&q=80)
+
+> Source code: [github.com/jdsalasca/pets-adoption](https://github.com/jdsalasca/pets-adoption)
 
 ## Features
-- User authentication with JWT tokens and role-based authorization.
+- User authentication with JWT tokens and role-based authorization (USER, FOUNDATION_ADMIN, SUPER_ADMIN).
 - Pet catalog management including images, species, and statuses.
 - Adoption request lifecycle with rich statistics and filtering.
 - Foundation onboarding workflow and contact messaging.
 - Database migrations managed with Flyway and PostgreSQL support.
 - Developer-friendly H2 in-memory profile for local testing.
+- Observability via Spring Boot Actuator (health, info, metrics).
+
+### Demo Credentials
+
+Swagger UI and the sample Postman collection rely on a demo account:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Standard user | `demo.user@petfriendly.dev` | `DemoPa55!` |
+
+Authenticate once in Swagger (`Authorize` button) and the UI will attach the bearer token to every secured request.
 
 ## Tech Stack
 - Java 21
@@ -66,6 +81,18 @@ The project bundles Springdoc OpenAPI. When the application is running you can v
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
+Each secured endpoint declares a `bearerAuth` requirement so the UI automatically adds `Authorization: Bearer <token>` after you authenticate.
+
+### Monitoring & Health
+
+Spring Boot Actuator is enabled when the application starts. The most common endpoints are:
+
+| Endpoint | Description |
+| --- | --- |
+| `GET /actuator/health` | Liveness probe (public) |
+| `GET /actuator/info` | Build information (public) |
+| `GET /actuator/metrics` | Micrometer metrics (requires SUPER_ADMIN) |
+
 ### Testing
 
 ```bash
@@ -73,6 +100,23 @@ mvn test
 ```
 
 Add integration tests under `src/test/java` to validate service and controller logic. The dev profile can be leveraged for fast in-memory tests.
+
+Quick smoke test with `curl`:
+
+```bash
+# Register demo user (idempotent on dev profile)
+curl -s -X POST http://localhost:8080/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"firstName":"Demo","lastName":"User","email":"demo.user@petfriendly.dev","password":"DemoPa55!","phone":"+573001112233","city":"Bogota"}'
+
+# Login and capture token
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"demo.user@petfriendly.dev","password":"DemoPa55!"}' | jq -r '.accessToken')
+
+# Call a protected endpoint
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/adoption-requests/count
+```
 
 ## Troubleshooting
 - Ensure Lombok annotation processing is enabled in your IDE if you rely on Lombok-generated methods.
