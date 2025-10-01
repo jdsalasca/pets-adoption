@@ -74,12 +74,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of("https://petfriendly.app", "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -137,36 +137,37 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/v1/adoption-requests/*/cancel").authenticated()
                 
                 // Foundation management - foundation owners/admins
-                .requestMatchers(HttpMethod.POST, "/api/v1/foundations").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/foundations/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/foundations/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/foundations").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/foundations/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/foundations/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
                 
                 // Pet management - foundation owners/admins
-                .requestMatchers(HttpMethod.POST, "/api/v1/pets").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/pets/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/pets/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/pets").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/pets/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/pets/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
                 
                 // Pet image management - foundation owners/admins
-                .requestMatchers(HttpMethod.POST, "/api/v1/pet-images").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/pet-images/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/pet-images/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/pet-images").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/pet-images/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/pet-images/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
                 
                 // Adoption request management - foundation owners/admins
-                .requestMatchers(HttpMethod.PUT, "/api/v1/adoption-requests/*/approve").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/adoption-requests/*/reject").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/v1/adoption-requests/pet/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/adoption-requests/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/adoption-requests/*/approve").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/adoption-requests/*/reject").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/adoption-requests/pet/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/adoption-requests/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
                 
                 // Contact message management - foundation owners/admins
-                .requestMatchers(HttpMethod.GET, "/api/v1/contact-messages/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/contact-messages/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/contact-messages/**").hasAnyRole("FOUNDATION_ADMIN", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/contact-messages/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/contact-messages/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/contact-messages/**").hasAnyRole("FOUNDATION_ADMIN", "SUPER_ADMIN")
                 
                 // Admin only endpoints
-                .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("SUPER_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("SUPER_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("SUPER_ADMIN")
+                .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")
                 
                 // All other requests require authentication
                 .anyRequest().authenticated()

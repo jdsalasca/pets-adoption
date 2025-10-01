@@ -1,19 +1,27 @@
 package com.petfriendly.backend.controller;
 
+import com.petfriendly.backend.dto.request.AdoptionRequestCreateRequest;
 import com.petfriendly.backend.entity.AdoptionRequest;
 import com.petfriendly.backend.entity.AdoptionRequestStatus;
+import com.petfriendly.backend.entity.Pet;
+import com.petfriendly.backend.entity.User;
 import com.petfriendly.backend.service.AdoptionRequestService;
+import com.petfriendly.backend.service.PetService;
+import com.petfriendly.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * REST Controller for AdoptionRequest entity operations
@@ -26,15 +34,36 @@ import java.util.UUID;
 public class AdoptionRequestController {
 
     private final AdoptionRequestService adoptionRequestService;
+    private final UserService userService;
+    private final PetService petService;
 
     /**
      * Create a new adoption request
      * POST /api/v1/adoption-requests
      */
     @PostMapping
-    public ResponseEntity<AdoptionRequest> createAdoptionRequest(@Valid @RequestBody AdoptionRequest adoptionRequest) {
-        log.info("Creating new adoption request for pet ID: {} by user ID: {}", 
-                adoptionRequest.getPet().getId(), adoptionRequest.getUser().getId());
+    public ResponseEntity<AdoptionRequest> createAdoptionRequest(@Valid @RequestBody AdoptionRequestCreateRequest request,
+                                                                 @AuthenticationPrincipal UserDetails currentUser) {
+        if (currentUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        User user = userService.findByEmail(currentUser.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        Pet pet = petService.findById(request.getPetId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pet not found"));
+
+        log.info("Creating new adoption request for pet ID: {} by user ID: {}", pet.getId(), user.getId());
+
+        AdoptionRequest adoptionRequest = AdoptionRequest.builder()
+                .user(user)
+                .pet(pet)
+                .message(request.getMessage())
+                .experience(request.getExperience())
+                .livingSituation(request.getLivingSituation())
+                .build();
+
         AdoptionRequest createdRequest = adoptionRequestService.createAdoptionRequest(adoptionRequest);
         return new ResponseEntity<>(createdRequest, HttpStatus.CREATED);
     }

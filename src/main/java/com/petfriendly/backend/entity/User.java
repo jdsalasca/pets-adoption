@@ -1,5 +1,6 @@
 package com.petfriendly.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.petfriendly.backend.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -45,6 +46,7 @@ public class User {
     @NotBlank(message = "Password is required")
     @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
     @Schema(description = "User password (encrypted)")
+    @JsonIgnore
     private String password;
 
     @Column(name = "first_name", nullable = false)
