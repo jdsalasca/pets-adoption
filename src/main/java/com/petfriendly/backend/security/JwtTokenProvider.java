@@ -21,7 +21,8 @@ public class JwtTokenProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${app.jwt.secret:mySecretKey}")
+    // Default secret must be sufficiently long for HS512 (>= 64 bytes)
+    @Value("${app.jwt.secret:my-super-secret-key-that-is-at-least-sixty-four-bytes-long-000000000000}")
     private String jwtSecret;
 
     @Value("${app.jwt.expiration:86400000}") // 24 hours in milliseconds

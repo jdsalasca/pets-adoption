@@ -1,0 +1,292 @@
+{
+  "info": {
+    "name": "PetFriendly Backend - Smoke Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Automated sequence to register/login a user, create foundation/pet/adoption request/contact message/pet image, and run sample GET endpoints. Configure baseUrl if needed."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" },
+    { "key": "password", "value": "P@ssw0rd123!" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const ts = Date.now();",
+          "pm.collectionVariables.set('ts', ts.toString());",
+          "if (!pm.collectionVariables.get('userEmail')) { pm.collectionVariables.set('userEmail', `test.user+${ts}@example.com`); }",
+          "if (!pm.collectionVariables.get('foundationEmail')) { pm.collectionVariables.set('foundationEmail', `foundation+${ts}@example.com`); }",
+          "if (!pm.collectionVariables.get('petName')) { pm.collectionVariables.set('petName', `Buddy ${ts}`); }",
+          "if (!pm.collectionVariables.get('petImageUrl')) { pm.collectionVariables.set('petImageUrl', `https://example.com/images/${ts}.jpg`); }",
+          "if (!pm.collectionVariables.get('password')) { pm.collectionVariables.set('password', 'P@ssw0rd123!'); }"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"5551234567\",\n  \"city\": \"Springfield\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Register status is 200/201', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Login returned accessToken', function () { pm.expect(json.accessToken).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('accessToken', json.accessToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Users",
+      "item": [
+        {
+          "name": "Get User by Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/users/email/{{userEmail}}", "host": ["{{baseUrl}}"], "path": ["users","email","{{userEmail}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('User fetched', function () { pm.expect(pm.response.code).to.be.oneOf([200]); pm.expect(json).to.have.property('id'); });",
+                  "pm.collectionVariables.set('userId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "List Users", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] } } },
+        { "name": "Users Page", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users/page?size=5&page=0", "host": ["{{baseUrl}}"], "path": ["users","page"], "query": [ {"key":"size","value":"5"}, {"key":"page","value":"0"} ] } } },
+        { "name": "Users Active", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users/active", "host": ["{{baseUrl}}"], "path": ["users","active"] } } },
+        { "name": "Users by Role USER", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users/role/USER", "host": ["{{baseUrl}}"], "path": ["users","role","USER"] } } },
+        { "name": "Users Search name=Test", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users/search?name=Test", "host": ["{{baseUrl}}"], "path": ["users","search"], "query": [ {"key":"name","value":"Test"} ] } } },
+        { "name": "Users Count", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/users/count", "host": ["{{baseUrl}}"], "path": ["users","count"] } } }
+      ]
+    },
+    {
+      "name": "03 - Foundations",
+      "item": [
+        {
+          "name": "Create Foundation",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/foundations", "host": ["{{baseUrl}}"], "path": ["foundations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Happy Tails Rescue {{ts}}\",\n  \"city\": \"Austin\",\n  \"state\": \"TX\",\n  \"description\": \"A caring pet rescue.\",\n  \"contactEmail\": \"{{foundationEmail}}\",\n  \"website\": \"https://happytails.example.com\",\n  \"address\": \"123 Rescue Rd, Austin, TX\",\n  \"phoneNumber\": \"555-222-3333\",\n  \"verified\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Foundation created', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); pm.expect(json).to.have.property('id'); });",
+                  "pm.collectionVariables.set('foundationId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "List Foundations", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/foundations", "host": ["{{baseUrl}}"], "path": ["foundations"] } } },
+        { "name": "Active Foundations", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/foundations/active", "host": ["{{baseUrl}}"], "path": ["foundations","active"] } } },
+        { "name": "Search Foundations name=Happy", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/foundations/search?name=Happy", "host": ["{{baseUrl}}"], "path": ["foundations","search"], "query": [ {"key":"name","value":"Happy"} ] } } }
+      ]
+    },
+    {
+      "name": "04 - Pets",
+      "item": [
+        {
+          "name": "Create Pet",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/pets", "host": ["{{baseUrl}}"], "path": ["pets"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{petName}}\",\n  \"species\": \"DOG\",\n  \"breed\": \"Mixed\",\n  \"age\": 3,\n  \"gender\": \"MALE\",\n  \"size\": \"MEDIUM\",\n  \"description\": \"Friendly dog.\",\n  \"status\": \"AVAILABLE\",\n  \"foundation\": { \n    \"id\": {{foundationId}} \n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Pet created', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); pm.expect(json).to.have.property('id'); });",
+                  "pm.collectionVariables.set('petId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "List Pets (page)", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pets?page=0&size=5", "host": ["{{baseUrl}}"], "path": ["pets"], "query": [ {"key":"page","value":"0"}, {"key":"size","value":"5"} ] } } },
+        { "name": "Pets by Foundation", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pets/foundation/{{foundationId}}", "host": ["{{baseUrl}}"], "path": ["pets","foundation","{{foundationId}}"] } } },
+        { "name": "Pets by Status AVAILABLE", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pets/status/AVAILABLE", "host": ["{{baseUrl}}"], "path": ["pets","status","AVAILABLE"] } } },
+        { "name": "Pets by Species DOG", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pets/species/DOG", "host": ["{{baseUrl}}"], "path": ["pets","species","DOG"] } } },
+        { "name": "Pets age range 1-5", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pets/age?min=1&max=5", "host": ["{{baseUrl}}"], "path": ["pets","age"], "query": [ {"key":"min","value":"1"}, {"key":"max","value":"5"} ] } } },
+        { "name": "Adopt Pet", "request": { "method": "PUT", "url": { "raw": "{{baseUrl}}/pets/{{petId}}/adopt", "host": ["{{baseUrl}}"], "path": ["pets","{{petId}}","adopt"] } } },
+        { "name": "Mark Pet Available", "request": { "method": "PUT", "url": { "raw": "{{baseUrl}}/pets/{{petId}}/available", "host": ["{{baseUrl}}"], "path": ["pets","{{petId}}","available"] } } }
+      ]
+    },
+    {
+      "name": "05 - Adoption Requests",
+      "item": [
+        {
+          "name": "Create Adoption Request",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/adoption-requests", "host": ["{{baseUrl}}"], "path": ["adoption-requests"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": { \"id\": {{userId}} },\n  \"pet\": { \"id\": {{petId}} },\n  \"message\": \"I would love to adopt Buddy.\",\n  \"experience\": \"Experienced pet owner.\",\n  \"livingSituation\": \"House with fenced yard\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Adoption request created', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); pm.expect(json).to.have.property('id'); });",
+                  "pm.collectionVariables.set('adoptId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "List Adoption Requests", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/adoption-requests", "host": ["{{baseUrl}}"], "path": ["adoption-requests"] } } },
+        { "name": "Adoption Requests by User", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/adoption-requests/user/{{userId}}", "host": ["{{baseUrl}}"], "path": ["adoption-requests","user","{{userId}}"] } } },
+        { "name": "Adoption Requests by Pet (PENDING)", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/adoption-requests/pet/{{petId}}/status/PENDING", "host": ["{{baseUrl}}"], "path": ["adoption-requests","pet","{{petId}}","status","PENDING"] } } }
+      ]
+    },
+    {
+      "name": "06 - Contact Messages",
+      "item": [
+        {
+          "name": "Create Contact Message",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/contact-messages", "host": ["{{baseUrl}}"], "path": ["contact-messages"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senderName\": \"Test User\",\n  \"senderEmail\": \"{{userEmail}}\",\n  \"message\": \"Hello foundation, I'm interested in volunteering.\",\n  \"foundation\": { \"id\": {{foundationId}} }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Contact message created', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); pm.expect(json).to.have.property('id'); });",
+                  "pm.collectionVariables.set('contactId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "List Contact Messages", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/contact-messages", "host": ["{{baseUrl}}"], "path": ["contact-messages"] } } },
+        { "name": "Unread Contact Messages", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/contact-messages/unread", "host": ["{{baseUrl}}"], "path": ["contact-messages","unread"] } } },
+        { "name": "Mark Contact Message Read", "request": { "method": "PUT", "url": { "raw": "{{baseUrl}}/contact-messages/{{contactId}}/mark-read", "host": ["{{baseUrl}}"], "path": ["contact-messages","{{contactId}}","mark-read"] } } },
+        { "name": "Read Contact Messages", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/contact-messages/read", "host": ["{{baseUrl}}"], "path": ["contact-messages","read"] } } }
+      ]
+    },
+    {
+      "name": "07 - Pet Images",
+      "item": [
+        {
+          "name": "Create Pet Image",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/pet-images", "host": ["{{baseUrl}}"], "path": ["pet-images"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageUrl\": \"{{petImageUrl}}\",\n  \"isPrimary\": true,\n  \"altText\": \"Buddy photo\",\n  \"pet\": { \"id\": {{petId}} }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Pet image created', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); pm.expect(json).to.have.property('id'); });",
+                  "pm.collectionVariables.set('petImageId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        { "name": "List Pet Images", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pet-images", "host": ["{{baseUrl}}"], "path": ["pet-images"] } } },
+        { "name": "Pet Images by Pet", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pet-images/pet/{{petId}}", "host": ["{{baseUrl}}"], "path": ["pet-images","pet","{{petId}}"] } } },
+        { "name": "Primary Pet Images", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pet-images/primary", "host": ["{{baseUrl}}"], "path": ["pet-images","primary"] } } },
+        { "name": "Secondary Pet Images", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/pet-images/secondary", "host": ["{{baseUrl}}"], "path": ["pet-images","secondary"] } } }
+      ]
+    }
+  ]
+}
