@@ -118,6 +118,9 @@ public class SecurityConfig {
                 // Swagger/OpenAPI endpoints
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 
+                // Allow framework error endpoint so exceptions can surface without triggering auth
+                .requestMatchers("/error").permitAll()
+                
                 // Health check endpoints
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 
