@@ -2,6 +2,9 @@ package com.petfriendly.backend.dto.mapper;
 
 import com.petfriendly.backend.dto.response.*;
 import com.petfriendly.backend.entity.*;
+import java.util.List;
+import java.util.Objects;
+import org.springframework.data.domain.Page;
 
 public final class DtoMapper {
 
@@ -114,5 +117,37 @@ public final class DtoMapper {
                 message.getCreatedAt(),
                 message.getReadAt()
         );
+    }
+
+    public static <T> List<T> nonNullList(List<T> list) {
+        return list == null ? List.of() : list.stream().filter(Objects::nonNull).toList();
+    }
+
+    public static List<UserResponse> toUserResponses(List<User> users) {
+        return nonNullList(users).stream().map(DtoMapper::toUserResponse).toList();
+    }
+
+    public static List<FoundationResponse> toFoundationResponses(List<Foundation> foundations) {
+        return nonNullList(foundations).stream().map(DtoMapper::toFoundationResponse).toList();
+    }
+
+    public static List<PetResponse> toPetResponses(List<Pet> pets) {
+        return nonNullList(pets).stream().map(DtoMapper::toPetResponse).toList();
+    }
+
+    public static List<PetImageResponse> toPetImageResponses(List<PetImage> images) {
+        return nonNullList(images).stream().map(DtoMapper::toPetImageResponse).toList();
+    }
+
+    public static List<AdoptionRequestResponse> toAdoptionRequestResponses(List<AdoptionRequest> requests) {
+        return nonNullList(requests).stream().map(DtoMapper::toAdoptionRequestResponse).toList();
+    }
+
+    public static List<ContactMessageResponse> toContactMessageResponses(List<ContactMessage> messages) {
+        return nonNullList(messages).stream().map(DtoMapper::toContactMessageResponse).toList();
+    }
+
+    public static <S, T> Page<T> mapPage(Page<S> page, java.util.function.Function<S, T> mapper) {
+        return page == null ? Page.empty() : page.map(mapper);
     }
 }

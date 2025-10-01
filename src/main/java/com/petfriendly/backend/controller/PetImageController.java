@@ -1,5 +1,7 @@
 package com.petfriendly.backend.controller;
 
+import com.petfriendly.backend.dto.mapper.DtoMapper;
+import com.petfriendly.backend.dto.response.PetImageResponse;
 import com.petfriendly.backend.entity.PetImage;
 import com.petfriendly.backend.service.PetImageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +32,20 @@ public class PetImageController {
 
     // Manual logger since Lombok @Slf4j is not working
     private static final Logger log = LoggerFactory.getLogger(PetImageController.class);
-
+    
     private final PetImageService petImageService;
+
+    private PetImageResponse toResponse(PetImage petImage) {
+        return DtoMapper.toPetImageResponse(petImage);
+    }
+
+    private List<PetImageResponse> toResponses(List<PetImage> images) {
+        return DtoMapper.toPetImageResponses(images);
+    }
+
+    private Page<PetImageResponse> toResponsePage(Page<PetImage> images) {
+        return DtoMapper.mapPage(images, DtoMapper::toPetImageResponse);
+    }
 
     /**
      * Create a new pet image
@@ -39,10 +53,10 @@ public class PetImageController {
      */
     @PostMapping
     @Operation(summary = "Create pet image", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PetImage> createPetImage(@Valid @RequestBody PetImage petImage) {
+    public ResponseEntity<PetImageResponse> createPetImage(@Valid @RequestBody PetImage petImage) {
         log.info("Creating new pet image for pet ID: {}", petImage.getPet().getId());
         PetImage createdPetImage = petImageService.createPetImage(petImage);
-        return new ResponseEntity<>(createdPetImage, HttpStatus.CREATED);
+        return new ResponseEntity<>(toResponse(createdPetImage), HttpStatus.CREATED);
     }
 
     /**
@@ -50,10 +64,9 @@ public class PetImageController {
      * GET /api/v1/pet-images
      */
     @GetMapping
-    public ResponseEntity<List<PetImage>> getAllPetImages() {
+    public ResponseEntity<List<PetImageResponse>> getAllPetImages() {
         log.info("Getting all pet images");
-        List<PetImage> petImages = petImageService.findAll();
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponses(petImageService.findAll()));
     }
 
     /**
@@ -61,10 +74,9 @@ public class PetImageController {
      * GET /api/v1/pet-images/page
      */
     @GetMapping("/page")
-    public ResponseEntity<Page<PetImage>> getAllPetImagesWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<PetImageResponse>> getAllPetImagesWithPagination(Pageable pageable) {
         log.info("Getting all pet images with pagination");
-        Page<PetImage> petImages = petImageService.findAll(pageable);
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponsePage(petImageService.findAll(pageable)));
     }
 
     /**
@@ -72,10 +84,10 @@ public class PetImageController {
      * GET /api/v1/pet-images/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<PetImage> getPetImageById(@PathVariable UUID id) {
+    public ResponseEntity<PetImageResponse> getPetImageById(@PathVariable UUID id) {
         log.info("Getting pet image by ID: {}", id);
         return petImageService.findById(id)
-                .map(petImage -> ResponseEntity.ok(petImage))
+                .map(petImage -> ResponseEntity.ok(toResponse(petImage)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -84,10 +96,9 @@ public class PetImageController {
      * GET /api/v1/pet-images/pet/{petId}
      */
     @GetMapping("/pet/{petId}")
-    public ResponseEntity<List<PetImage>> getPetImagesByPetId(@PathVariable UUID petId) {
+    public ResponseEntity<List<PetImageResponse>> getPetImagesByPetId(@PathVariable UUID petId) {
         log.info("Getting pet images by pet ID: {}", petId);
-        List<PetImage> petImages = petImageService.findByPetId(petId);
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponses(petImageService.findByPetId(petId)));
     }
 
     /**
@@ -95,10 +106,9 @@ public class PetImageController {
      * GET /api/v1/pet-images/pet/{petId}/page
      */
     @GetMapping("/pet/{petId}/page")
-    public ResponseEntity<Page<PetImage>> getPetImagesByPetIdWithPagination(@PathVariable UUID petId, Pageable pageable) {
+    public ResponseEntity<Page<PetImageResponse>> getPetImagesByPetIdWithPagination(@PathVariable UUID petId, Pageable pageable) {
         log.info("Getting pet images by pet ID with pagination: {}", petId);
-        Page<PetImage> petImages = petImageService.findByPetId(petId, pageable);
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponsePage(petImageService.findByPetId(petId, pageable)));
     }
 
     /**
@@ -106,10 +116,10 @@ public class PetImageController {
      * GET /api/v1/pet-images/pet/{petId}/primary
      */
     @GetMapping("/pet/{petId}/primary")
-    public ResponseEntity<PetImage> getPrimaryImageByPetId(@PathVariable UUID petId) {
+    public ResponseEntity<PetImageResponse> getPrimaryImageByPetId(@PathVariable UUID petId) {
         log.info("Getting primary image for pet ID: {}", petId);
         return petImageService.findPrimaryByPetId(petId)
-                .map(petImage -> ResponseEntity.ok(petImage))
+                .map(petImage -> ResponseEntity.ok(toResponse(petImage)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -118,10 +128,9 @@ public class PetImageController {
      * GET /api/v1/pet-images/pet/{petId}/secondary
      */
     @GetMapping("/pet/{petId}/secondary")
-    public ResponseEntity<List<PetImage>> getSecondaryImagesByPetId(@PathVariable UUID petId) {
+    public ResponseEntity<List<PetImageResponse>> getSecondaryImagesByPetId(@PathVariable UUID petId) {
         log.info("Getting secondary images for pet ID: {}", petId);
-        List<PetImage> petImages = petImageService.findSecondaryByPetId(petId);
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponses(petImageService.findSecondaryByPetId(petId)));
     }
 
     /**
@@ -129,10 +138,9 @@ public class PetImageController {
      * GET /api/v1/pet-images/pet/{petId}/secondary/page
      */
     @GetMapping("/pet/{petId}/secondary/page")
-    public ResponseEntity<Page<PetImage>> getSecondaryImagesByPetIdWithPagination(@PathVariable UUID petId, Pageable pageable) {
+    public ResponseEntity<Page<PetImageResponse>> getSecondaryImagesByPetIdWithPagination(@PathVariable UUID petId, Pageable pageable) {
         log.info("Getting secondary images for pet ID with pagination: {}", petId);
-        Page<PetImage> petImages = petImageService.findSecondaryByPetId(petId, pageable);
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponsePage(petImageService.findSecondaryByPetId(petId, pageable)));
     }
 
     /**
@@ -140,10 +148,9 @@ public class PetImageController {
      * GET /api/v1/pet-images/search?url={urlPattern}
      */
     @GetMapping("/search")
-    public ResponseEntity<List<PetImage>> searchPetImagesByUrl(@RequestParam String url) {
+    public ResponseEntity<List<PetImageResponse>> searchPetImagesByUrl(@RequestParam String url) {
         log.info("Searching pet images by URL pattern: {}", url);
-        List<PetImage> petImages = petImageService.findByImageUrlContaining(url);
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponses(petImageService.findByImageUrlContaining(url)));
     }
 
     /**
@@ -151,10 +158,9 @@ public class PetImageController {
      * GET /api/v1/pet-images/search/page?url={urlPattern}
      */
     @GetMapping("/search/page")
-    public ResponseEntity<Page<PetImage>> searchPetImagesByUrlWithPagination(@RequestParam String url, Pageable pageable) {
+    public ResponseEntity<Page<PetImageResponse>> searchPetImagesByUrlWithPagination(@RequestParam String url, Pageable pageable) {
         log.info("Searching pet images by URL pattern with pagination: {}", url);
-        Page<PetImage> petImages = petImageService.findByImageUrlContaining(url, pageable);
-        return ResponseEntity.ok(petImages);
+        return ResponseEntity.ok(toResponsePage(petImageService.findByImageUrlContaining(url, pageable)));
     }
 
     /**
@@ -163,11 +169,11 @@ public class PetImageController {
      */
     @PutMapping("/{id}")
     @Operation(summary = "Update pet image", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PetImage> updatePetImage(@PathVariable UUID id, @Valid @RequestBody PetImage petImage) {
+    public ResponseEntity<PetImageResponse> updatePetImage(@PathVariable UUID id, @Valid @RequestBody PetImage petImage) {
         log.info("Updating pet image with ID: {}", id);
         try {
             PetImage updatedPetImage = petImageService.updatePetImage(id, petImage);
-            return ResponseEntity.ok(updatedPetImage);
+            return ResponseEntity.ok(toResponse(updatedPetImage));
         } catch (RuntimeException e) {
             log.error("Error updating pet image: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -180,11 +186,11 @@ public class PetImageController {
      */
     @PutMapping("/{id}/set-primary")
     @Operation(summary = "Set primary image", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PetImage> setPrimaryImage(@PathVariable UUID id) {
+    public ResponseEntity<PetImageResponse> setPrimaryImage(@PathVariable UUID id) {
         log.info("Setting pet image as primary: {}", id);
         try {
             PetImage primaryImage = petImageService.setPrimaryImage(id);
-            return ResponseEntity.ok(primaryImage);
+            return ResponseEntity.ok(toResponse(primaryImage));
         } catch (RuntimeException e) {
             log.error("Error setting pet image as primary: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -197,11 +203,11 @@ public class PetImageController {
      */
     @PutMapping("/{id}/remove-primary")
     @Operation(summary = "Remove primary flag", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PetImage> removePrimaryStatus(@PathVariable UUID id) {
+    public ResponseEntity<PetImageResponse> removePrimaryStatus(@PathVariable UUID id) {
         log.info("Removing primary status from pet image: {}", id);
         try {
             PetImage updatedImage = petImageService.removePrimaryStatus(id);
-            return ResponseEntity.ok(updatedImage);
+            return ResponseEntity.ok(toResponse(updatedImage));
         } catch (RuntimeException e) {
             log.error("Error removing primary status from pet image: {}", e.getMessage());
             return ResponseEntity.notFound().build();

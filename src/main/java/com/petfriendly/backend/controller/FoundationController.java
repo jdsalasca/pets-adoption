@@ -1,5 +1,7 @@
 package com.petfriendly.backend.controller;
 
+import com.petfriendly.backend.dto.mapper.DtoMapper;
+import com.petfriendly.backend.dto.response.FoundationResponse;
 import com.petfriendly.backend.entity.Foundation;
 import com.petfriendly.backend.service.FoundationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,16 +30,28 @@ public class FoundationController {
 
     private final FoundationService foundationService;
 
+    private FoundationResponse toResponse(Foundation foundation) {
+        return DtoMapper.toFoundationResponse(foundation);
+    }
+
+    private List<FoundationResponse> toResponses(List<Foundation> foundations) {
+        return DtoMapper.toFoundationResponses(foundations);
+    }
+
+    private Page<FoundationResponse> toResponsePage(Page<Foundation> foundations) {
+        return DtoMapper.mapPage(foundations, DtoMapper::toFoundationResponse);
+    }
+
     /**
      * Create a new foundation
      * POST /api/v1/foundations
      */
     @PostMapping
     @Operation(summary = "Create foundation", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Foundation> createFoundation(@Valid @RequestBody Foundation foundation) {
+    public ResponseEntity<FoundationResponse> createFoundation(@Valid @RequestBody Foundation foundation) {
         log.info("Creating new foundation: {}", foundation.getName());
         Foundation createdFoundation = foundationService.createFoundation(foundation);
-        return new ResponseEntity<>(createdFoundation, HttpStatus.CREATED);
+        return new ResponseEntity<>(toResponse(createdFoundation), HttpStatus.CREATED);
     }
 
     /**
@@ -45,10 +59,9 @@ public class FoundationController {
      * GET /api/v1/foundations
      */
     @GetMapping
-    public ResponseEntity<List<Foundation>> getAllFoundations() {
+    public ResponseEntity<List<FoundationResponse>> getAllFoundations() {
         log.info("Getting all foundations");
-        List<Foundation> foundations = foundationService.findAll();
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponses(foundationService.findAll()));
     }
 
     /**
@@ -56,10 +69,9 @@ public class FoundationController {
      * GET /api/v1/foundations/page
      */
     @GetMapping("/page")
-    public ResponseEntity<Page<Foundation>> getAllFoundationsWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<FoundationResponse>> getAllFoundationsWithPagination(Pageable pageable) {
         log.info("Getting all foundations with pagination");
-        Page<Foundation> foundations = foundationService.findAll(pageable);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponsePage(foundationService.findAll(pageable)));
     }
 
     /**
@@ -67,10 +79,10 @@ public class FoundationController {
      * GET /api/v1/foundations/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Foundation> getFoundationById(@PathVariable UUID id) {
+    public ResponseEntity<FoundationResponse> getFoundationById(@PathVariable UUID id) {
         log.info("Getting foundation by ID: {}", id);
         return foundationService.findById(id)
-                .map(foundation -> ResponseEntity.ok(foundation))
+                .map(foundation -> ResponseEntity.ok(toResponse(foundation)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -79,10 +91,10 @@ public class FoundationController {
      * GET /api/v1/foundations/name/{name}
      */
     @GetMapping("/name/{name}")
-    public ResponseEntity<Foundation> getFoundationByName(@PathVariable String name) {
+    public ResponseEntity<FoundationResponse> getFoundationByName(@PathVariable String name) {
         log.info("Getting foundation by name: {}", name);
         return foundationService.findByName(name)
-                .map(foundation -> ResponseEntity.ok(foundation))
+                .map(foundation -> ResponseEntity.ok(toResponse(foundation)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -91,10 +103,10 @@ public class FoundationController {
      * GET /api/v1/foundations/email/{email}
      */
     @GetMapping("/email/{email}")
-    public ResponseEntity<Foundation> getFoundationByEmail(@PathVariable String email) {
+    public ResponseEntity<FoundationResponse> getFoundationByEmail(@PathVariable String email) {
         log.info("Getting foundation by email: {}", email);
         return foundationService.findByEmail(email)
-                .map(foundation -> ResponseEntity.ok(foundation))
+                .map(foundation -> ResponseEntity.ok(toResponse(foundation)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -103,10 +115,9 @@ public class FoundationController {
      * GET /api/v1/foundations/city/{city}
      */
     @GetMapping("/city/{city}")
-    public ResponseEntity<List<Foundation>> getFoundationsByCity(@PathVariable String city) {
+    public ResponseEntity<List<FoundationResponse>> getFoundationsByCity(@PathVariable String city) {
         log.info("Getting foundations by city: {}", city);
-        List<Foundation> foundations = foundationService.findByCity(city);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponses(foundationService.findByCity(city)));
     }
 
     /**
@@ -114,10 +125,9 @@ public class FoundationController {
      * GET /api/v1/foundations/city/{city}/page
      */
     @GetMapping("/city/{city}/page")
-    public ResponseEntity<Page<Foundation>> getFoundationsByCityWithPagination(@PathVariable String city, Pageable pageable) {
+    public ResponseEntity<Page<FoundationResponse>> getFoundationsByCityWithPagination(@PathVariable String city, Pageable pageable) {
         log.info("Getting foundations by city with pagination: {}", city);
-        Page<Foundation> foundations = foundationService.findByCity(city, pageable);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponsePage(foundationService.findByCity(city, pageable)));
     }
 
     /**
@@ -125,10 +135,9 @@ public class FoundationController {
      * GET /api/v1/foundations/state/{state}
      */
     @GetMapping("/state/{state}")
-    public ResponseEntity<List<Foundation>> getFoundationsByState(@PathVariable String state) {
+    public ResponseEntity<List<FoundationResponse>> getFoundationsByState(@PathVariable String state) {
         log.info("Getting foundations by state: {}", state);
-        List<Foundation> foundations = foundationService.findByState(state);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponses(foundationService.findByState(state)));
     }
 
     /**
@@ -136,10 +145,9 @@ public class FoundationController {
      * GET /api/v1/foundations/state/{state}/page
      */
     @GetMapping("/state/{state}/page")
-    public ResponseEntity<Page<Foundation>> getFoundationsByStateWithPagination(@PathVariable String state, Pageable pageable) {
+    public ResponseEntity<Page<FoundationResponse>> getFoundationsByStateWithPagination(@PathVariable String state, Pageable pageable) {
         log.info("Getting foundations by state with pagination: {}", state);
-        Page<Foundation> foundations = foundationService.findByState(state, pageable);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponsePage(foundationService.findByState(state, pageable)));
     }
 
     /**
@@ -147,10 +155,9 @@ public class FoundationController {
      * GET /api/v1/foundations/active
      */
     @GetMapping("/active")
-    public ResponseEntity<List<Foundation>> getActiveFoundations() {
+    public ResponseEntity<List<FoundationResponse>> getActiveFoundations() {
         log.info("Getting active foundations");
-        List<Foundation> foundations = foundationService.findActiveFoundations();
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponses(foundationService.findActiveFoundations()));
     }
 
     /**
@@ -158,10 +165,9 @@ public class FoundationController {
      * GET /api/v1/foundations/active/page
      */
     @GetMapping("/active/page")
-    public ResponseEntity<Page<Foundation>> getActiveFoundationsWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<FoundationResponse>> getActiveFoundationsWithPagination(Pageable pageable) {
         log.info("Getting active foundations with pagination");
-        Page<Foundation> foundations = foundationService.findActiveFoundations(pageable);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponsePage(foundationService.findActiveFoundations(pageable)));
     }
 
     /**
@@ -169,10 +175,9 @@ public class FoundationController {
      * GET /api/v1/foundations/search?name={name}
      */
     @GetMapping("/search")
-    public ResponseEntity<List<Foundation>> searchFoundationsByName(@RequestParam String name) {
+    public ResponseEntity<List<FoundationResponse>> searchFoundationsByName(@RequestParam String name) {
         log.info("Searching foundations by name: {}", name);
-        List<Foundation> foundations = foundationService.findByNameContaining(name);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponses(foundationService.findByNameContaining(name)));
     }
 
     /**
@@ -180,10 +185,9 @@ public class FoundationController {
      * GET /api/v1/foundations/search/page?name={name}
      */
     @GetMapping("/search/page")
-    public ResponseEntity<Page<Foundation>> searchFoundationsByNameWithPagination(@RequestParam String name, Pageable pageable) {
+    public ResponseEntity<Page<FoundationResponse>> searchFoundationsByNameWithPagination(@RequestParam String name, Pageable pageable) {
         log.info("Searching foundations by name with pagination: {}", name);
-        Page<Foundation> foundations = foundationService.findByNameContaining(name, pageable);
-        return ResponseEntity.ok(foundations);
+        return ResponseEntity.ok(toResponsePage(foundationService.findByNameContaining(name, pageable)));
     }
 
     /**
@@ -192,11 +196,11 @@ public class FoundationController {
      */
     @PutMapping("/{id}")
     @Operation(summary = "Update foundation", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Foundation> updateFoundation(@PathVariable UUID id, @Valid @RequestBody Foundation foundation) {
+    public ResponseEntity<FoundationResponse> updateFoundation(@PathVariable UUID id, @Valid @RequestBody Foundation foundation) {
         log.info("Updating foundation with ID: {}", id);
         try {
             Foundation updatedFoundation = foundationService.updateFoundation(id, foundation);
-            return ResponseEntity.ok(updatedFoundation);
+            return ResponseEntity.ok(toResponse(updatedFoundation));
         } catch (RuntimeException e) {
             log.error("Error updating foundation: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -209,11 +213,11 @@ public class FoundationController {
      */
     @PutMapping("/{id}/activate")
     @Operation(summary = "Activate foundation", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Foundation> activateFoundation(@PathVariable UUID id) {
+    public ResponseEntity<FoundationResponse> activateFoundation(@PathVariable UUID id) {
         log.info("Activating foundation with ID: {}", id);
         try {
             Foundation activatedFoundation = foundationService.activateFoundation(id);
-            return ResponseEntity.ok(activatedFoundation);
+            return ResponseEntity.ok(toResponse(activatedFoundation));
         } catch (RuntimeException e) {
             log.error("Error activating foundation: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -226,11 +230,11 @@ public class FoundationController {
      */
     @PutMapping("/{id}/deactivate")
     @Operation(summary = "Deactivate foundation", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Foundation> deactivateFoundation(@PathVariable UUID id) {
+    public ResponseEntity<FoundationResponse> deactivateFoundation(@PathVariable UUID id) {
         log.info("Deactivating foundation with ID: {}", id);
         try {
             Foundation deactivatedFoundation = foundationService.deactivateFoundation(id);
-            return ResponseEntity.ok(deactivatedFoundation);
+            return ResponseEntity.ok(toResponse(deactivatedFoundation));
         } catch (RuntimeException e) {
             log.error("Error deactivating foundation: {}", e.getMessage());
             return ResponseEntity.notFound().build();

@@ -1,5 +1,7 @@
 package com.petfriendly.backend.controller;
 
+import com.petfriendly.backend.dto.mapper.DtoMapper;
+import com.petfriendly.backend.dto.response.ContactMessageResponse;
 import com.petfriendly.backend.entity.ContactMessage;
 import com.petfriendly.backend.service.ContactMessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,17 +32,29 @@ public class ContactMessageController {
     private static final Logger log = LoggerFactory.getLogger(ContactMessageController.class);
     private final ContactMessageService contactMessageService;
 
+    private ContactMessageResponse toResponse(ContactMessage message) {
+        return DtoMapper.toContactMessageResponse(message);
+    }
+
+    private List<ContactMessageResponse> toResponses(List<ContactMessage> messages) {
+        return DtoMapper.toContactMessageResponses(messages);
+    }
+
+    private Page<ContactMessageResponse> toResponsePage(Page<ContactMessage> messages) {
+        return DtoMapper.mapPage(messages, DtoMapper::toContactMessageResponse);
+    }
+
     /**
      * Create a new contact message
      * POST /api/v1/contact-messages
      */
     @PostMapping
     @Operation(summary = "Create contact message", description = "Public endpoint to send a message to a foundation.", security = {})
-    public ResponseEntity<ContactMessage> createContactMessage(@Valid @RequestBody ContactMessage contactMessage) {
+    public ResponseEntity<ContactMessageResponse> createContactMessage(@Valid @RequestBody ContactMessage contactMessage) {
         log.info("Creating new contact message from: {} to foundation ID: {}", 
                 contactMessage.getSenderEmail(), contactMessage.getFoundation().getId());
         ContactMessage createdMessage = contactMessageService.createContactMessage(contactMessage);
-        return new ResponseEntity<>(createdMessage, HttpStatus.CREATED);
+        return new ResponseEntity<>(toResponse(createdMessage), HttpStatus.CREATED);
     }
 
     /**
@@ -49,10 +63,9 @@ public class ContactMessageController {
      */
     @GetMapping
     @Operation(summary = "List contact messages", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<List<ContactMessage>> getAllContactMessages() {
+    public ResponseEntity<List<ContactMessageResponse>> getAllContactMessages() {
         log.info("Getting all contact messages");
-        List<ContactMessage> messages = contactMessageService.findAll();
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findAll()));
     }
 
     /**
@@ -61,10 +74,9 @@ public class ContactMessageController {
      */
     @GetMapping("/page")
     @Operation(summary = "List contact messages (paged)", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Page<ContactMessage>> getAllContactMessagesWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> getAllContactMessagesWithPagination(Pageable pageable) {
         log.info("Getting all contact messages with pagination");
-        Page<ContactMessage> messages = contactMessageService.findAll(pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findAll(pageable)));
     }
 
     /**
@@ -73,10 +85,10 @@ public class ContactMessageController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Get contact message", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<ContactMessage> getContactMessageById(@PathVariable UUID id) {
+    public ResponseEntity<ContactMessageResponse> getContactMessageById(@PathVariable UUID id) {
         log.info("Getting contact message by ID: {}", id);
         return contactMessageService.findById(id)
-                .map(message -> ResponseEntity.ok(message))
+                .map(message -> ResponseEntity.ok(toResponse(message)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -85,10 +97,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/foundation/{foundationId}
      */
     @GetMapping("/foundation/{foundationId}")
-    public ResponseEntity<List<ContactMessage>> getContactMessagesByFoundationId(@PathVariable UUID foundationId) {
+    public ResponseEntity<List<ContactMessageResponse>> getContactMessagesByFoundationId(@PathVariable UUID foundationId) {
         log.info("Getting contact messages by foundation ID: {}", foundationId);
-        List<ContactMessage> messages = contactMessageService.findByFoundationId(foundationId);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByFoundationId(foundationId)));
     }
 
     /**
@@ -96,10 +107,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/foundation/{foundationId}/page
      */
     @GetMapping("/foundation/{foundationId}/page")
-    public ResponseEntity<Page<ContactMessage>> getContactMessagesByFoundationIdWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> getContactMessagesByFoundationIdWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
         log.info("Getting contact messages by foundation ID with pagination: {}", foundationId);
-        Page<ContactMessage> messages = contactMessageService.findByFoundationId(foundationId, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByFoundationId(foundationId, pageable)));
     }
 
     /**
@@ -107,10 +117,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/email/{email}
      */
     @GetMapping("/email/{email}")
-    public ResponseEntity<List<ContactMessage>> getContactMessagesByEmail(@PathVariable String email) {
+    public ResponseEntity<List<ContactMessageResponse>> getContactMessagesByEmail(@PathVariable String email) {
         log.info("Getting contact messages by email: {}", email);
-        List<ContactMessage> messages = contactMessageService.findByEmail(email);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByEmail(email)));
     }
 
     /**
@@ -118,10 +127,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/email/{email}/page
      */
     @GetMapping("/email/{email}/page")
-    public ResponseEntity<Page<ContactMessage>> getContactMessagesByEmailWithPagination(@PathVariable String email, Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> getContactMessagesByEmailWithPagination(@PathVariable String email, Pageable pageable) {
         log.info("Getting contact messages by email with pagination: {}", email);
-        Page<ContactMessage> messages = contactMessageService.findByEmail(email, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByEmail(email, pageable)));
     }
 
     /**
@@ -129,10 +137,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/search/name?name={namePattern}
      */
     @GetMapping("/search/name")
-    public ResponseEntity<List<ContactMessage>> searchContactMessagesByName(@RequestParam String name) {
+    public ResponseEntity<List<ContactMessageResponse>> searchContactMessagesByName(@RequestParam String name) {
         log.info("Searching contact messages by name pattern: {}", name);
-        List<ContactMessage> messages = contactMessageService.findByNameContaining(name);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByNameContaining(name)));
     }
 
     /**
@@ -140,10 +147,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/search/name/page?name={namePattern}
      */
     @GetMapping("/search/name/page")
-    public ResponseEntity<Page<ContactMessage>> searchContactMessagesByNameWithPagination(@RequestParam String name, Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> searchContactMessagesByNameWithPagination(@RequestParam String name, Pageable pageable) {
         log.info("Searching contact messages by name pattern with pagination: {}", name);
-        Page<ContactMessage> messages = contactMessageService.findByNameContaining(name, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByNameContaining(name, pageable)));
     }
 
     /**
@@ -151,10 +157,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/search/subject?subject={subjectPattern}
      */
     @GetMapping("/search/subject")
-    public ResponseEntity<List<ContactMessage>> searchContactMessagesBySubject(@RequestParam String subject) {
+    public ResponseEntity<List<ContactMessageResponse>> searchContactMessagesBySubject(@RequestParam String subject) {
         log.info("Searching contact messages by subject pattern: {}", subject);
-        List<ContactMessage> messages = contactMessageService.findBySubjectContaining(subject);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findBySubjectContaining(subject)));
     }
 
     /**
@@ -162,10 +167,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/search/subject/page?subject={subjectPattern}
      */
     @GetMapping("/search/subject/page")
-    public ResponseEntity<Page<ContactMessage>> searchContactMessagesBySubjectWithPagination(@RequestParam String subject, Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> searchContactMessagesBySubjectWithPagination(@RequestParam String subject, Pageable pageable) {
         log.info("Searching contact messages by subject pattern with pagination: {}", subject);
-        Page<ContactMessage> messages = contactMessageService.findBySubjectContaining(subject, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findBySubjectContaining(subject, pageable)));
     }
 
     /**
@@ -173,10 +177,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/search/message?message={messagePattern}
      */
     @GetMapping("/search/message")
-    public ResponseEntity<List<ContactMessage>> searchContactMessagesByMessage(@RequestParam String message) {
+    public ResponseEntity<List<ContactMessageResponse>> searchContactMessagesByMessage(@RequestParam String message) {
         log.info("Searching contact messages by message pattern: {}", message);
-        List<ContactMessage> messages = contactMessageService.findByMessageContaining(message);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByMessageContaining(message)));
     }
 
     /**
@@ -184,10 +187,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/search/message/page?message={messagePattern}
      */
     @GetMapping("/search/message/page")
-    public ResponseEntity<Page<ContactMessage>> searchContactMessagesByMessageWithPagination(@RequestParam String message, Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> searchContactMessagesByMessageWithPagination(@RequestParam String message, Pageable pageable) {
         log.info("Searching contact messages by message pattern with pagination: {}", message);
-        Page<ContactMessage> messages = contactMessageService.findByMessageContaining(message, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByMessageContaining(message, pageable)));
     }
 
     /**
@@ -195,10 +197,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/read
      */
     @GetMapping("/read")
-    public ResponseEntity<List<ContactMessage>> getReadContactMessages() {
+    public ResponseEntity<List<ContactMessageResponse>> getReadContactMessages() {
         log.info("Getting read contact messages");
-        List<ContactMessage> messages = contactMessageService.findByIsRead(true);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByIsRead(true)));
     }
 
     /**
@@ -206,10 +207,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/read/page
      */
     @GetMapping("/read/page")
-    public ResponseEntity<Page<ContactMessage>> getReadContactMessagesWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> getReadContactMessagesWithPagination(Pageable pageable) {
         log.info("Getting read contact messages with pagination");
-        Page<ContactMessage> messages = contactMessageService.findByIsRead(true, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByIsRead(true, pageable)));
     }
 
     /**
@@ -217,10 +217,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/unread
      */
     @GetMapping("/unread")
-    public ResponseEntity<List<ContactMessage>> getUnreadContactMessages() {
+    public ResponseEntity<List<ContactMessageResponse>> getUnreadContactMessages() {
         log.info("Getting unread contact messages");
-        List<ContactMessage> messages = contactMessageService.findByIsRead(false);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByIsRead(false)));
     }
 
     /**
@@ -228,10 +227,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/unread/page
      */
     @GetMapping("/unread/page")
-    public ResponseEntity<Page<ContactMessage>> getUnreadContactMessagesWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> getUnreadContactMessagesWithPagination(Pageable pageable) {
         log.info("Getting unread contact messages with pagination");
-        Page<ContactMessage> messages = contactMessageService.findByIsRead(false, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByIsRead(false, pageable)));
     }
 
     /**
@@ -239,10 +237,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/foundation/{foundationId}/read
      */
     @GetMapping("/foundation/{foundationId}/read")
-    public ResponseEntity<List<ContactMessage>> getReadContactMessagesByFoundation(@PathVariable UUID foundationId) {
+    public ResponseEntity<List<ContactMessageResponse>> getReadContactMessagesByFoundation(@PathVariable UUID foundationId) {
         log.info("Getting read contact messages by foundation: {}", foundationId);
-        List<ContactMessage> messages = contactMessageService.findByFoundationIdAndIsRead(foundationId, true);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByFoundationIdAndIsRead(foundationId, true)));
     }
 
     /**
@@ -250,10 +247,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/foundation/{foundationId}/read/page
      */
     @GetMapping("/foundation/{foundationId}/read/page")
-    public ResponseEntity<Page<ContactMessage>> getReadContactMessagesByFoundationWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> getReadContactMessagesByFoundationWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
         log.info("Getting read contact messages by foundation with pagination: {}", foundationId);
-        Page<ContactMessage> messages = contactMessageService.findByFoundationIdAndIsRead(foundationId, true, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByFoundationIdAndIsRead(foundationId, true, pageable)));
     }
 
     /**
@@ -261,10 +257,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/foundation/{foundationId}/unread
      */
     @GetMapping("/foundation/{foundationId}/unread")
-    public ResponseEntity<List<ContactMessage>> getUnreadContactMessagesByFoundation(@PathVariable UUID foundationId) {
+    public ResponseEntity<List<ContactMessageResponse>> getUnreadContactMessagesByFoundation(@PathVariable UUID foundationId) {
         log.info("Getting unread contact messages by foundation: {}", foundationId);
-        List<ContactMessage> messages = contactMessageService.findByFoundationIdAndIsRead(foundationId, false);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponses(contactMessageService.findByFoundationIdAndIsRead(foundationId, false)));
     }
 
     /**
@@ -272,10 +267,9 @@ public class ContactMessageController {
      * GET /api/v1/contact-messages/foundation/{foundationId}/unread/page
      */
     @GetMapping("/foundation/{foundationId}/unread/page")
-    public ResponseEntity<Page<ContactMessage>> getUnreadContactMessagesByFoundationWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
+    public ResponseEntity<Page<ContactMessageResponse>> getUnreadContactMessagesByFoundationWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
         log.info("Getting unread contact messages by foundation with pagination: {}", foundationId);
-        Page<ContactMessage> messages = contactMessageService.findByFoundationIdAndIsRead(foundationId, false, pageable);
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(toResponsePage(contactMessageService.findByFoundationIdAndIsRead(foundationId, false, pageable)));
     }
 
     /**
@@ -283,11 +277,11 @@ public class ContactMessageController {
      * PUT /api/v1/contact-messages/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ContactMessage> updateContactMessage(@PathVariable UUID id, @Valid @RequestBody ContactMessage contactMessage) {
+    public ResponseEntity<ContactMessageResponse> updateContactMessage(@PathVariable UUID id, @Valid @RequestBody ContactMessage contactMessage) {
         log.info("Updating contact message with ID: {}", id);
         try {
             ContactMessage updatedMessage = contactMessageService.updateContactMessage(id, contactMessage);
-            return ResponseEntity.ok(updatedMessage);
+            return ResponseEntity.ok(toResponse(updatedMessage));
         } catch (RuntimeException e) {
             log.error("Error updating contact message: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -299,11 +293,11 @@ public class ContactMessageController {
      * PUT /api/v1/contact-messages/{id}/mark-read
      */
     @PutMapping("/{id}/mark-read")
-    public ResponseEntity<ContactMessage> markContactMessageAsRead(@PathVariable UUID id) {
+    public ResponseEntity<ContactMessageResponse> markContactMessageAsRead(@PathVariable UUID id) {
         log.info("Marking contact message as read: {}", id);
         try {
             ContactMessage readMessage = contactMessageService.markAsRead(id);
-            return ResponseEntity.ok(readMessage);
+            return ResponseEntity.ok(toResponse(readMessage));
         } catch (RuntimeException e) {
             log.error("Error marking contact message as read: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -315,11 +309,11 @@ public class ContactMessageController {
      * PUT /api/v1/contact-messages/{id}/mark-unread
      */
     @PutMapping("/{id}/mark-unread")
-    public ResponseEntity<ContactMessage> markContactMessageAsUnread(@PathVariable UUID id) {
+    public ResponseEntity<ContactMessageResponse> markContactMessageAsUnread(@PathVariable UUID id) {
         log.info("Marking contact message as unread: {}", id);
         try {
             ContactMessage unreadMessage = contactMessageService.markAsUnread(id);
-            return ResponseEntity.ok(unreadMessage);
+            return ResponseEntity.ok(toResponse(unreadMessage));
         } catch (RuntimeException e) {
             log.error("Error marking contact message as unread: {}", e.getMessage());
             return ResponseEntity.notFound().build();

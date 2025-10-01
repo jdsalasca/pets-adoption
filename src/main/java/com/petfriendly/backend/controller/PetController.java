@@ -1,5 +1,7 @@
 package com.petfriendly.backend.controller;
 
+import com.petfriendly.backend.dto.mapper.DtoMapper;
+import com.petfriendly.backend.dto.response.PetResponse;
 import com.petfriendly.backend.entity.Pet;
 import com.petfriendly.backend.entity.PetSpecies;
 import com.petfriendly.backend.entity.PetStatus;
@@ -27,7 +29,20 @@ import java.util.UUID;
 @Slf4j
 @CrossOrigin(origins = "*")
 public class PetController {
-private final PetService petService;
+
+    private final PetService petService;
+
+    private PetResponse toResponse(Pet pet) {
+        return DtoMapper.toPetResponse(pet);
+    }
+
+    private List<PetResponse> toResponses(List<Pet> pets) {
+        return DtoMapper.toPetResponses(pets);
+    }
+
+    private Page<PetResponse> toResponsePage(Page<Pet> pets) {
+        return DtoMapper.mapPage(pets, DtoMapper::toPetResponse);
+    }
 
     /**
      * Create a new pet
@@ -35,10 +50,10 @@ private final PetService petService;
      */
     @PostMapping
     @Operation(summary = "Create a pet", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Pet> createPet(@Valid @RequestBody Pet pet) {
+    public ResponseEntity<PetResponse> createPet(@Valid @RequestBody Pet pet) {
         log.info("Creating new pet: {}", pet.getName());
         Pet createdPet = petService.createPet(pet);
-        return new ResponseEntity<>(createdPet, HttpStatus.CREATED);
+        return new ResponseEntity<>(toResponse(createdPet), HttpStatus.CREATED);
     }
 
     /**
@@ -46,10 +61,9 @@ private final PetService petService;
      * GET /api/v1/pets
      */
     @GetMapping
-    public ResponseEntity<Page<Pet>> getAllPets(Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getAllPets(Pageable pageable) {
         log.info("Getting all pets with pagination");
-        Page<Pet> pets = petService.findAll(pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findAll(pageable)));
     }
 
     /**
@@ -57,10 +71,9 @@ private final PetService petService;
      * GET /api/v1/pets/page
      */
     @GetMapping("/page")
-    public ResponseEntity<Page<Pet>> getAllPetsWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getAllPetsWithPagination(Pageable pageable) {
         log.info("Getting all pets with pagination");
-        Page<Pet> pets = petService.findAll(pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findAll(pageable)));
     }
 
     /**
@@ -68,10 +81,10 @@ private final PetService petService;
      * GET /api/v1/pets/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Pet> getPetById(@PathVariable UUID id) {
+    public ResponseEntity<PetResponse> getPetById(@PathVariable UUID id) {
         log.info("Getting pet by ID: {}", id);
         return petService.findById(id)
-                .map(pet -> ResponseEntity.ok(pet))
+                .map(pet -> ResponseEntity.ok(toResponse(pet)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -80,10 +93,9 @@ private final PetService petService;
      * GET /api/v1/pets/foundation/{foundationId}
      */
     @GetMapping("/foundation/{foundationId}")
-    public ResponseEntity<List<Pet>> getPetsByFoundationId(@PathVariable UUID foundationId) {
+    public ResponseEntity<List<PetResponse>> getPetsByFoundationId(@PathVariable UUID foundationId) {
         log.info("Getting pets by foundation ID: {}", foundationId);
-        List<Pet> pets = petService.findByFoundationId(foundationId);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findByFoundationId(foundationId)));
     }
 
     /**
@@ -91,10 +103,9 @@ private final PetService petService;
      * GET /api/v1/pets/foundation/{foundationId}/page
      */
     @GetMapping("/foundation/{foundationId}/page")
-    public ResponseEntity<Page<Pet>> getPetsByFoundationIdWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getPetsByFoundationIdWithPagination(@PathVariable UUID foundationId, Pageable pageable) {
         log.info("Getting pets by foundation ID with pagination: {}", foundationId);
-        Page<Pet> pets = petService.findByFoundationId(foundationId, pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findByFoundationId(foundationId, pageable)));
     }
 
     /**
@@ -102,10 +113,9 @@ private final PetService petService;
      * GET /api/v1/pets/status/{status}
      */
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Pet>> getPetsByStatus(@PathVariable PetStatus status) {
+    public ResponseEntity<List<PetResponse>> getPetsByStatus(@PathVariable PetStatus status) {
         log.info("Getting pets by status: {}", status);
-        List<Pet> pets = petService.findByStatus(status);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findByStatus(status)));
     }
 
     /**
@@ -113,10 +123,9 @@ private final PetService petService;
      * GET /api/v1/pets/status/{status}/page
      */
     @GetMapping("/status/{status}/page")
-    public ResponseEntity<Page<Pet>> getPetsByStatusWithPagination(@PathVariable PetStatus status, Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getPetsByStatusWithPagination(@PathVariable PetStatus status, Pageable pageable) {
         log.info("Getting pets by status with pagination: {}", status);
-        Page<Pet> pets = petService.findByStatus(status, pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findByStatus(status, pageable)));
     }
 
     /**
@@ -124,11 +133,10 @@ private final PetService petService;
      * GET /api/v1/pets/species/{species}
      */
     @GetMapping("/species/{species}")
-    public ResponseEntity<List<Pet>> getPetsBySpecies(@PathVariable String species) {
+    public ResponseEntity<List<PetResponse>> getPetsBySpecies(@PathVariable String species) {
         log.info("Getting pets by species: {}", species);
         PetSpecies petSpecies = PetSpecies.valueOf(species.toUpperCase());
-        List<Pet> pets = petService.findBySpecies(petSpecies);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findBySpecies(petSpecies)));
     }
 
     /**
@@ -136,11 +144,10 @@ private final PetService petService;
      * GET /api/v1/pets/species/{species}/page
      */
     @GetMapping("/species/{species}/page")
-    public ResponseEntity<Page<Pet>> getPetsBySpeciesWithPagination(@PathVariable String species, Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getPetsBySpeciesWithPagination(@PathVariable String species, Pageable pageable) {
         log.info("Getting pets by species with pagination: {}", species);
         PetSpecies petSpecies = PetSpecies.valueOf(species.toUpperCase());
-        Page<Pet> pets = petService.findBySpecies(petSpecies, pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findBySpecies(petSpecies, pageable)));
     }
 
     /**
@@ -148,10 +155,9 @@ private final PetService petService;
      * GET /api/v1/pets/breed/{breed}
      */
     @GetMapping("/breed/{breed}")
-    public ResponseEntity<List<Pet>> getPetsByBreed(@PathVariable String breed) {
+    public ResponseEntity<List<PetResponse>> getPetsByBreed(@PathVariable String breed) {
         log.info("Getting pets by breed: {}", breed);
-        List<Pet> pets = petService.findByBreed(breed);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findByBreed(breed)));
     }
 
     /**
@@ -159,10 +165,9 @@ private final PetService petService;
      * GET /api/v1/pets/breed/{breed}/page
      */
     @GetMapping("/breed/{breed}/page")
-    public ResponseEntity<Page<Pet>> getPetsByBreedWithPagination(@PathVariable String breed, Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getPetsByBreedWithPagination(@PathVariable String breed, Pageable pageable) {
         log.info("Getting pets by breed with pagination: {}", breed);
-        Page<Pet> pets = petService.findByBreed(breed, pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findByBreed(breed, pageable)));
     }
 
     /**
@@ -170,10 +175,9 @@ private final PetService petService;
      * GET /api/v1/pets/age?min={minAge}&max={maxAge}
      */
     @GetMapping("/age")
-    public ResponseEntity<List<Pet>> getPetsByAgeRange(@RequestParam Integer minAge, @RequestParam Integer maxAge) {
+    public ResponseEntity<List<PetResponse>> getPetsByAgeRange(@RequestParam Integer minAge, @RequestParam Integer maxAge) {
         log.info("Getting pets by age range: {} to {}", minAge, maxAge);
-        List<Pet> pets = petService.findByAgeBetween(minAge, maxAge);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findByAgeBetween(minAge, maxAge)));
     }
 
     /**
@@ -181,10 +185,9 @@ private final PetService petService;
      * GET /api/v1/pets/age/page?min={minAge}&max={maxAge}
      */
     @GetMapping("/age/page")
-    public ResponseEntity<Page<Pet>> getPetsByAgeRangeWithPagination(@RequestParam Integer minAge, @RequestParam Integer maxAge, Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getPetsByAgeRangeWithPagination(@RequestParam Integer minAge, @RequestParam Integer maxAge, Pageable pageable) {
         log.info("Getting pets by age range with pagination: {} to {}", minAge, maxAge);
-        Page<Pet> pets = petService.findByAgeBetween(minAge, maxAge, pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findByAgeBetween(minAge, maxAge, pageable)));
     }
 
     /**
@@ -192,10 +195,9 @@ private final PetService petService;
      * GET /api/v1/pets/available
      */
     @GetMapping("/available")
-    public ResponseEntity<List<Pet>> getAvailablePets() {
+    public ResponseEntity<List<PetResponse>> getAvailablePets() {
         log.info("Getting available pets for adoption");
-        List<Pet> pets = petService.findAvailableForAdoption();
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findAvailableForAdoption()));
     }
 
     /**
@@ -203,10 +205,9 @@ private final PetService petService;
      * GET /api/v1/pets/available/page
      */
     @GetMapping("/available/page")
-    public ResponseEntity<Page<Pet>> getAvailablePetsWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getAvailablePetsWithPagination(Pageable pageable) {
         log.info("Getting available pets for adoption with pagination");
-        Page<Pet> pets = petService.findAvailableForAdoption(pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findAvailableForAdoption(pageable)));
     }
 
     /**
@@ -214,10 +215,9 @@ private final PetService petService;
      * GET /api/v1/pets/search?name={name}
      */
     @GetMapping("/search")
-    public ResponseEntity<List<Pet>> searchPetsByName(@RequestParam String name) {
+    public ResponseEntity<List<PetResponse>> searchPetsByName(@RequestParam String name) {
         log.info("Searching pets by name: {}", name);
-        List<Pet> pets = petService.findByNameContaining(name);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findByNameContaining(name)));
     }
 
     /**
@@ -225,10 +225,9 @@ private final PetService petService;
      * GET /api/v1/pets/search/page?name={name}
      */
     @GetMapping("/search/page")
-    public ResponseEntity<Page<Pet>> searchPetsByNameWithPagination(@RequestParam String name, Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> searchPetsByNameWithPagination(@RequestParam String name, Pageable pageable) {
         log.info("Searching pets by name with pagination: {}", name);
-        Page<Pet> pets = petService.findByNameContaining(name, pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findByNameContaining(name, pageable)));
     }
 
     /**
@@ -236,10 +235,9 @@ private final PetService petService;
      * GET /api/v1/pets/foundation/{foundationId}/status/{status}
      */
     @GetMapping("/foundation/{foundationId}/status/{status}")
-    public ResponseEntity<List<Pet>> getPetsByFoundationAndStatus(@PathVariable UUID foundationId, @PathVariable PetStatus status) {
+    public ResponseEntity<List<PetResponse>> getPetsByFoundationAndStatus(@PathVariable UUID foundationId, @PathVariable PetStatus status) {
         log.info("Getting pets by foundation ID {} and status: {}", foundationId, status);
-        List<Pet> pets = petService.findByFoundationIdAndStatus(foundationId, status);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponses(petService.findByFoundationIdAndStatus(foundationId, status)));
     }
 
     /**
@@ -247,10 +245,9 @@ private final PetService petService;
      * GET /api/v1/pets/foundation/{foundationId}/status/{status}/page
      */
     @GetMapping("/foundation/{foundationId}/status/{status}/page")
-    public ResponseEntity<Page<Pet>> getPetsByFoundationAndStatusWithPagination(@PathVariable UUID foundationId, @PathVariable PetStatus status, Pageable pageable) {
+    public ResponseEntity<Page<PetResponse>> getPetsByFoundationAndStatusWithPagination(@PathVariable UUID foundationId, @PathVariable PetStatus status, Pageable pageable) {
         log.info("Getting pets by foundation ID {} and status with pagination: {}", foundationId, status);
-        Page<Pet> pets = petService.findByFoundationIdAndStatus(foundationId, status, pageable);
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.ok(toResponsePage(petService.findByFoundationIdAndStatus(foundationId, status, pageable)));
     }
 
     /**
@@ -259,11 +256,11 @@ private final PetService petService;
      */
     @PutMapping("/{id}")
     @Operation(summary = "Update pet", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Pet> updatePet(@PathVariable UUID id, @Valid @RequestBody Pet pet) {
+    public ResponseEntity<PetResponse> updatePet(@PathVariable UUID id, @Valid @RequestBody Pet pet) {
         log.info("Updating pet with ID: {}", id);
         try {
             Pet updatedPet = petService.updatePet(id, pet);
-            return ResponseEntity.ok(updatedPet);
+            return ResponseEntity.ok(toResponse(updatedPet));
         } catch (RuntimeException e) {
             log.error("Error updating pet: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -276,11 +273,11 @@ private final PetService petService;
      */
     @PutMapping("/{id}/status")
     @Operation(summary = "Update pet status", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Pet> updatePetStatus(@PathVariable UUID id, @RequestBody PetStatus status) {
+    public ResponseEntity<PetResponse> updatePetStatus(@PathVariable UUID id, @RequestBody PetStatus status) {
         log.info("Updating status for pet ID {} to: {}", id, status);
         try {
             Pet updatedPet = petService.updateStatus(id, status);
-            return ResponseEntity.ok(updatedPet);
+            return ResponseEntity.ok(toResponse(updatedPet));
         } catch (RuntimeException e) {
             log.error("Error updating pet status: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -293,11 +290,11 @@ private final PetService petService;
      */
     @PutMapping("/{id}/adopt")
     @Operation(summary = "Mark pet as adopted", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Pet> adoptPet(@PathVariable UUID id) {
+    public ResponseEntity<PetResponse> adoptPet(@PathVariable UUID id) {
         log.info("Marking pet as adopted: {}", id);
         try {
             Pet adoptedPet = petService.markAsAdopted(id);
-            return ResponseEntity.ok(adoptedPet);
+            return ResponseEntity.ok(toResponse(adoptedPet));
         } catch (RuntimeException e) {
             log.error("Error marking pet as adopted: {}", e.getMessage());
             return ResponseEntity.notFound().build();
@@ -310,11 +307,11 @@ private final PetService petService;
      */
     @PutMapping("/{id}/available")
     @Operation(summary = "Mark pet as available", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Pet> markPetAsAvailable(@PathVariable UUID id) {
+    public ResponseEntity<PetResponse> markPetAsAvailable(@PathVariable UUID id) {
         log.info("Marking pet as available: {}", id);
         try {
             Pet availablePet = petService.markAsAvailable(id);
-            return ResponseEntity.ok(availablePet);
+            return ResponseEntity.ok(toResponse(availablePet));
         } catch (RuntimeException e) {
             log.error("Error marking pet as available: {}", e.getMessage());
             return ResponseEntity.notFound().build();
