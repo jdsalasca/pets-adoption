@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, User user) {
+    public User updateUser(UUID id, User user) {
         log.info("Updating user with ID: {}", id);
 
         User existingUser = userRepository.findById(id)
@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<User> findById(Long id) {
+    public Optional<User> findById(UUID id) {
         return userRepository.findById(id);
     }
 
@@ -142,7 +142,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean existsById(Long id) {
+    public boolean existsById(UUID id) {
         return userRepository.existsById(id);
     }
 
@@ -165,7 +165,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteById(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new IllegalArgumentException("User not found with ID: " + id);
         }
@@ -173,7 +173,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User activateUser(Long id) {
+    public User activateUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         user.setActive(true);
@@ -182,7 +182,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User deactivateUser(Long id) {
+    public User deactivateUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         user.setActive(false);
@@ -191,7 +191,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User changePassword(Long id, String newPassword) {
+    public User changePassword(UUID id, String newPassword) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -200,7 +200,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateProfile(Long id, String firstName, String lastName, String phone) {
+    public User updateProfile(UUID id, String firstName, String lastName, String phone) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
 

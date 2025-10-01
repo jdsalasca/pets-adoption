@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  * Custom UserDetailsService implementation for Spring Security
@@ -43,7 +44,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserById(String id) {
         log.debug("Loading user by ID: {}", id);
         
-        User user = userRepository.findById(Long.parseLong(id))
+        User user = userRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 
         return UserPrincipal.create(user);

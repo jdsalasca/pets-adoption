@@ -27,9 +27,9 @@ public interface AdoptionRequestRepository extends JpaRepository<AdoptionRequest
 
     Page<AdoptionRequest> findByUser(User user, Pageable pageable);
 
-    List<AdoptionRequest> findByUser_Id(Long userId);
+    List<AdoptionRequest> findByUser_Id(UUID userId);
 
-    Page<AdoptionRequest> findByUser_Id(Long userId, Pageable pageable);
+    Page<AdoptionRequest> findByUser_Id(UUID userId, Pageable pageable);
 
     List<AdoptionRequest> findByPet(Pet pet);
 
@@ -45,9 +45,9 @@ public interface AdoptionRequestRepository extends JpaRepository<AdoptionRequest
 
     List<AdoptionRequest> findByUserAndStatus(User user, AdoptionRequestStatus status);
 
-    List<AdoptionRequest> findByUser_IdAndStatus(Long userId, AdoptionRequestStatus status);
+    List<AdoptionRequest> findByUser_IdAndStatus(UUID userId, AdoptionRequestStatus status);
 
-    Page<AdoptionRequest> findByUser_IdAndStatus(Long userId, AdoptionRequestStatus status, Pageable pageable);
+    Page<AdoptionRequest> findByUser_IdAndStatus(UUID userId, AdoptionRequestStatus status, Pageable pageable);
 
     List<AdoptionRequest> findByPetAndStatus(Pet pet, AdoptionRequestStatus status);
 
@@ -92,11 +92,11 @@ public interface AdoptionRequestRepository extends JpaRepository<AdoptionRequest
 
     long countByPet(Pet pet);
 // Count methods
-    long countByUser_Id(Long userId);
+    long countByUser_Id(UUID userId);
 
     long countByPet_Id(UUID petId);
 
-    long countByUser_IdAndStatus(Long userId, AdoptionRequestStatus status);
+    long countByUser_IdAndStatus(UUID userId, AdoptionRequestStatus status);
 
     long countByPet_IdAndStatus(UUID petId, AdoptionRequestStatus status);
 
@@ -104,7 +104,7 @@ public interface AdoptionRequestRepository extends JpaRepository<AdoptionRequest
 
     boolean existsByUserAndStatus(User user, AdoptionRequestStatus status);
 
-    boolean existsByUser_IdAndPet_Id(Long userId, UUID petId);
+    boolean existsByUser_IdAndPet_Id(UUID userId, UUID petId);
 
     @Query("SELECT ar FROM AdoptionRequest ar ORDER BY ar.createdAt DESC")
     Page<AdoptionRequest> findRecentAdoptionRequests(Pageable pageable);

@@ -161,7 +161,7 @@ private final PetImageRepository petImageRepository;
                 .orElseThrow(() -> new RuntimeException("Pet image not found with ID: " + petImageId));
         
         // First, remove primary status from any existing primary image of the same pet
-        Optional<PetImage> existingPrimaryImage = petImageRepository.findByPetIdAndIsPrimaryTrue(petImage.getPet().getId());
+        Optional<PetImage> existingPrimaryImage = petImageRepository.findByPet_IdAndIsPrimaryTrue(petImage.getPet().getId());
         if (existingPrimaryImage.isPresent()) {
             PetImage existingPrimary = existingPrimaryImage.get();
             existingPrimary.setIsPrimary(false);

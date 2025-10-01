@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -47,7 +48,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(@PathVariable UUID id) {
         log.info("Fetching user with ID: {}", id);
         return userService.findById(id)
                 .map(ResponseEntity::ok)
@@ -104,7 +105,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable UUID id, @Valid @RequestBody User user) {
         log.info("Updating user with ID: {}", id);
         try {
             return ResponseEntity.ok(userService.updateUser(id, user));
@@ -115,7 +116,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/activate")
-    public ResponseEntity<User> activateUser(@PathVariable Long id) {
+    public ResponseEntity<User> activateUser(@PathVariable UUID id) {
         log.info("Activating user with ID: {}", id);
         try {
             return ResponseEntity.ok(userService.activateUser(id));
@@ -126,7 +127,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/deactivate")
-    public ResponseEntity<User> deactivateUser(@PathVariable Long id) {
+    public ResponseEntity<User> deactivateUser(@PathVariable UUID id) {
         log.info("Deactivating user with ID: {}", id);
         try {
             return ResponseEntity.ok(userService.deactivateUser(id));
@@ -137,7 +138,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         log.info("Deleting user with ID: {}", id);
         try {
             userService.deleteById(id);
@@ -149,7 +150,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
-    public ResponseEntity<Void> checkUserExists(@PathVariable Long id) {
+    public ResponseEntity<Void> checkUserExists(@PathVariable UUID id) {
         return userService.existsById(id) ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 

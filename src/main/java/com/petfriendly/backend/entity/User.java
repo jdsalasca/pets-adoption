@@ -31,9 +31,9 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "User ID", example = "1")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Schema(description = "User ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    private java.util.UUID id;
 
     @Column(unique = true, nullable = false)
     @NotBlank(message = "Email is required")

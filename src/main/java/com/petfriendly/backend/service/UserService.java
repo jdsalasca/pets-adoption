@@ -16,9 +16,9 @@ public interface UserService {
 
     User createUser(User user);
 
-    User updateUser(Long id, User user);
+    User updateUser(UUID id, User user);
 
-    Optional<User> findById(Long id);
+    Optional<User> findById(UUID id);
 
     Optional<User> findByEmail(String email);
 
@@ -40,7 +40,7 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
-    boolean existsById(Long id);
+    boolean existsById(UUID id);
 
     long count();
 
@@ -48,15 +48,15 @@ public interface UserService {
 
     long countByRole(Role role);
 
-    void deleteById(Long id);
+    void deleteById(UUID id);
 
-    User activateUser(Long id);
+    User activateUser(UUID id);
 
-    User deactivateUser(Long id);
+    User deactivateUser(UUID id);
 
-    User changePassword(Long id, String newPassword);
+    User changePassword(UUID id, String newPassword);
 
-    User updateProfile(Long id, String firstName, String lastName, String phone);
+    User updateProfile(UUID id, String firstName, String lastName, String phone);
 
     UserStatistics getStatistics();
 

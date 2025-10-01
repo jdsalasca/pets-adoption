@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  * UserPrincipal implementation for Spring Security
@@ -19,7 +20,7 @@ import java.util.Collections;
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private Long id;
+    private UUID id;
     private String email;
     private String password;
     private String firstName;
