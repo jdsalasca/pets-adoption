@@ -1,5 +1,7 @@
 package com.petfriendly.backend.controller;
 
+import com.petfriendly.backend.dto.mapper.DtoMapper;
+import com.petfriendly.backend.dto.response.UserResponse;
 import com.petfriendly.backend.entity.User;
 import com.petfriendly.backend.enums.Role;
 import com.petfriendly.backend.service.UserService;
@@ -37,34 +39,36 @@ public class UserController {
     @Operation(summary = "Create user", description = "Creates a new user. Requires SUPER_ADMIN role.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created",
-                    content = @Content(schema = @Schema(implementation = User.class))),
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "409", description = "Email already exists")
     })
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody User user) {
         log.info("Creating new user with email: {}", user.getEmail());
         User createdUser = userService.createUser(user);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(DtoMapper.toUserResponse(createdUser), HttpStatus.CREATED);
     }
 
     @GetMapping
     @Operation(summary = "List users", description = "Returns all platform users. Requires SUPER_ADMIN role.")
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         log.info("Getting all users");
-        return ResponseEntity.ok(userService.findAll());
+        return ResponseEntity.ok(userService.findAll().stream()
+                .map(DtoMapper::toUserResponse)
+                .toList());
     }
 
     @GetMapping("/page")
-    public ResponseEntity<Page<User>> getAllUsersWithPagination(Pageable pageable) {
+    public ResponseEntity<Page<UserResponse>> getAllUsersWithPagination(Pageable pageable) {
         log.info("Getting all users with pagination");
-        return ResponseEntity.ok(userService.findAll(pageable));
+        return ResponseEntity.ok(userService.findAll(pageable).map(DtoMapper::toUserResponse));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         log.info("Fetching user with ID: {}", id);
         return userService.findById(id)
-                .map(ResponseEntity::ok)
+                .map(user -> ResponseEntity.ok(DtoMapper.toUserResponse(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -72,56 +76,56 @@ public class UserController {
     @Operation(summary = "Get user by email", description = "Retrieve a user by their email address")
     @ApiResponse(responseCode = "200", description = "User found")
     @ApiResponse(responseCode = "404", description = "User not found")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
         log.info("Getting user by email: {}", email);
         return userService.findByEmail(email)
-                .map(ResponseEntity::ok)
+                .map(user -> ResponseEntity.ok(DtoMapper.toUserResponse(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/role/{role}")
-    public ResponseEntity<List<User>> getUsersByRole(@PathVariable String role) {
+    public ResponseEntity<List<UserResponse>> getUsersByRole(@PathVariable String role) {
         log.info("Getting users by role: {}", role);
         Role requestedRole = Role.valueOf(role.toUpperCase());
-        return ResponseEntity.ok(userService.findByRole(requestedRole));
+        return ResponseEntity.ok(userService.findByRole(requestedRole).stream().map(DtoMapper::toUserResponse).toList());
     }
 
     @GetMapping("/role/{role}/page")
-    public ResponseEntity<Page<User>> getUsersByRoleWithPagination(@PathVariable String role, Pageable pageable) {
+    public ResponseEntity<Page<UserResponse>> getUsersByRoleWithPagination(@PathVariable String role, Pageable pageable) {
         log.info("Getting users by role with pagination: {}", role);
         Role requestedRole = Role.valueOf(role.toUpperCase());
-        return ResponseEntity.ok(userService.findByRole(requestedRole, pageable));
+        return ResponseEntity.ok(userService.findByRole(requestedRole, pageable).map(DtoMapper::toUserResponse));
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<User>> getActiveUsers() {
+    public ResponseEntity<List<UserResponse>> getActiveUsers() {
         log.info("Getting active users");
-        return ResponseEntity.ok(userService.findActiveUsers());
+        return ResponseEntity.ok(userService.findActiveUsers().stream().map(DtoMapper::toUserResponse).toList());
     }
 
     @GetMapping("/active/page")
-    public ResponseEntity<Page<User>> getActiveUsers(Pageable pageable) {
+    public ResponseEntity<Page<UserResponse>> getActiveUsers(Pageable pageable) {
         log.info("Getting active users with pagination");
-        return ResponseEntity.ok(userService.findActiveUsers(pageable));
+        return ResponseEntity.ok(userService.findActiveUsers(pageable).map(DtoMapper::toUserResponse));
     }
 
     @GetMapping("/search/{name}")
-    public ResponseEntity<List<User>> searchUsersByName(@PathVariable String name) {
+    public ResponseEntity<List<UserResponse>> searchUsersByName(@PathVariable String name) {
         log.info("Searching users by name: {}", name);
-        return ResponseEntity.ok(userService.findByNameContaining(name));
+        return ResponseEntity.ok(userService.findByNameContaining(name).stream().map(DtoMapper::toUserResponse).toList());
     }
 
     @GetMapping("/search/{name}/page")
-    public ResponseEntity<Page<User>> searchUsersByName(@PathVariable String name, Pageable pageable) {
+    public ResponseEntity<Page<UserResponse>> searchUsersByName(@PathVariable String name, Pageable pageable) {
         log.info("Searching users by name with pagination: {}", name);
-        return ResponseEntity.ok(userService.findByNameContaining(name, pageable));
+        return ResponseEntity.ok(userService.findByNameContaining(name, pageable).map(DtoMapper::toUserResponse));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable UUID id, @Valid @RequestBody User user) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable UUID id, @Valid @RequestBody User user) {
         log.info("Updating user with ID: {}", id);
         try {
-            return ResponseEntity.ok(userService.updateUser(id, user));
+            return ResponseEntity.ok(DtoMapper.toUserResponse(userService.updateUser(id, user)));
         } catch (IllegalArgumentException ex) {
             log.error("Error updating user: {}", ex.getMessage());
             return ResponseEntity.notFound().build();
@@ -129,10 +133,10 @@ public class UserController {
     }
 
     @PutMapping("/{id}/activate")
-    public ResponseEntity<User> activateUser(@PathVariable UUID id) {
+    public ResponseEntity<UserResponse> activateUser(@PathVariable UUID id) {
         log.info("Activating user with ID: {}", id);
         try {
-            return ResponseEntity.ok(userService.activateUser(id));
+            return ResponseEntity.ok(DtoMapper.toUserResponse(userService.activateUser(id)));
         } catch (IllegalArgumentException ex) {
             log.error("Error activating user: {}", ex.getMessage());
             return ResponseEntity.notFound().build();
@@ -140,10 +144,10 @@ public class UserController {
     }
 
     @PutMapping("/{id}/deactivate")
-    public ResponseEntity<User> deactivateUser(@PathVariable UUID id) {
+    public ResponseEntity<UserResponse> deactivateUser(@PathVariable UUID id) {
         log.info("Deactivating user with ID: {}", id);
         try {
-            return ResponseEntity.ok(userService.deactivateUser(id));
+            return ResponseEntity.ok(DtoMapper.toUserResponse(userService.deactivateUser(id)));
         } catch (IllegalArgumentException ex) {
             log.error("Error deactivating user: {}", ex.getMessage());
             return ResponseEntity.notFound().build();
