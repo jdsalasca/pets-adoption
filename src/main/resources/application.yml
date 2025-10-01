@@ -9,8 +9,8 @@ spring:
   
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres}
-    username: ${DATABASE_USERNAME:postgres.edqbmfflruzjebbxvlux}
-    password: ${DATABASE_PASSWORD:#Colgate01_$}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
   
   jpa:

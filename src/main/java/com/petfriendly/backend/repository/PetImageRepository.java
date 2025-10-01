@@ -31,7 +31,7 @@ public interface PetImageRepository extends JpaRepository<PetImage, UUID> {
      * @param petId the pet ID to find images for
      * @return list of images belonging to the pet
      */
-    List<PetImage> findByPetId(UUID petId);
+    List<PetImage> findByPet_Id(UUID petId);
 
     /**
      * Find all images for a specific pet by pet ID with pagination
@@ -39,7 +39,7 @@ public interface PetImageRepository extends JpaRepository<PetImage, UUID> {
      * @param pageable pagination information
      * @return page of images belonging to the pet
      */
-    Page<PetImage> findByPetId(UUID petId, Pageable pageable);
+    Page<PetImage> findByPet_Id(UUID petId, Pageable pageable);
 
     /**
      * Find the primary image for a specific pet
@@ -53,14 +53,14 @@ public interface PetImageRepository extends JpaRepository<PetImage, UUID> {
      * @param petId the pet ID to find the primary image for
      * @return Optional containing the primary image if found
      */
-    Optional<PetImage> findByPetIdAndIsPrimaryTrue(UUID petId);
+    Optional<PetImage> findByPet_IdAndIsPrimaryTrue(UUID petId);
 
     /**
      * Find secondary (non-primary) images for a specific pet by pet ID
      * @param petId the pet ID to find images for
      * @return list of secondary images belonging to the pet
      */
-    List<PetImage> findByPetIdAndIsPrimaryFalse(UUID petId);
+    List<PetImage> findByPet_IdAndIsPrimaryFalse(UUID petId);
 
     /**
      * Find secondary (non-primary) images for a specific pet by pet ID with pagination
@@ -68,7 +68,7 @@ public interface PetImageRepository extends JpaRepository<PetImage, UUID> {
      * @param pageable pagination information
      * @return page of secondary images belonging to the pet
      */
-    Page<PetImage> findByPetIdAndIsPrimaryFalse(UUID petId, Pageable pageable);
+    Page<PetImage> findByPet_IdAndIsPrimaryFalse(UUID petId, Pageable pageable);
 
     /**
      * Find images by URL containing pattern (case insensitive)
@@ -90,14 +90,14 @@ public interface PetImageRepository extends JpaRepository<PetImage, UUID> {
      * @param petId the pet ID to check
      * @return true if the pet has a primary image, false otherwise
      */
-    boolean existsByPetIdAndIsPrimaryTrue(UUID petId);
+    boolean existsByPet_IdAndIsPrimaryTrue(UUID petId);
 
     /**
      * Count primary images for a specific pet by pet ID
      * @param petId the pet ID to count primary images for
      * @return number of primary images for the pet
      */
-    long countByPetIdAndIsPrimaryTrue(UUID petId);
+    long countByPet_IdAndIsPrimaryTrue(UUID petId);
 
     /**
      * Find all primary images
@@ -125,7 +125,7 @@ public interface PetImageRepository extends JpaRepository<PetImage, UUID> {
      * @param petId the pet ID to count images for
      * @return number of images for the pet
      */
-    long countByPetId(UUID petId);
+    long countByPet_Id(UUID petId);
 
     /**
      * Check if a pet has a primary image
@@ -144,7 +144,7 @@ public interface PetImageRepository extends JpaRepository<PetImage, UUID> {
      * Delete all images for a specific pet by pet ID
      * @param petId the pet ID to delete images for
      */
-    void deleteByPetId(UUID petId);
+    void deleteByPet_Id(UUID petId);
 
     /**
      * Count primary images

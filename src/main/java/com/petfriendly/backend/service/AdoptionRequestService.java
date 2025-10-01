@@ -34,13 +34,13 @@ public interface AdoptionRequestService {
 
     Page<AdoptionRequest> findByUser(User user, Pageable pageable);
 
-    List<AdoptionRequest> findByUserId(UUID userId);
+    List<AdoptionRequest> findByUserId(Long userId);
 
-    Page<AdoptionRequest> findByUserId(UUID userId, Pageable pageable);
+    Page<AdoptionRequest> findByUserId(Long userId, Pageable pageable);
 
-    List<AdoptionRequest> findByUserIdAndStatus(UUID userId, AdoptionRequestStatus status);
+    List<AdoptionRequest> findByUserIdAndStatus(Long userId, AdoptionRequestStatus status);
 
-    Page<AdoptionRequest> findByUserIdAndStatus(UUID userId, AdoptionRequestStatus status, Pageable pageable);
+    Page<AdoptionRequest> findByUserIdAndStatus(Long userId, AdoptionRequestStatus status, Pageable pageable);
 
     List<AdoptionRequest> findByPet(Pet pet);
 
@@ -73,7 +73,7 @@ public interface AdoptionRequestService {
 
     long countByPet(Pet pet);
 
-    long countByUserId(UUID userId);
+    long countByUserId(Long userId);
 
     long countByPetId(UUID petId);
 
@@ -82,11 +82,11 @@ public interface AdoptionRequestService {
     // Existence checks
     boolean hasUserRequestedAdoption(User user, Pet pet);
 
-    boolean hasUserRequestedAdoption(UUID userId, UUID petId);
+    boolean hasUserRequestedAdoption(Long userId, UUID petId);
 
     boolean hasPendingRequests(User user);
 
-    boolean hasPendingRequests(UUID userId);
+    boolean hasPendingRequests(Long userId);
 
     // Status transitions
     AdoptionRequest approveRequest(UUID id, String reviewNotes);
@@ -109,7 +109,7 @@ public interface AdoptionRequestService {
 
     AdoptionRequestStatistics getStatisticsByFoundation(UUID foundationId);
 
-    AdoptionRequestStatistics getStatisticsByUser(UUID userId);
+    AdoptionRequestStatistics getStatisticsByUser(Long userId);
 
     AdoptionRequestStatistics getStatisticsByPet(UUID petId);
 

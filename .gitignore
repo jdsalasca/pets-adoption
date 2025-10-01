@@ -31,3 +31,46 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS files ###
+.DS_Store
+Thumbs.db
+
+### Env & secrets ###
+.env
+.env.local
+.env.*
+.envrc
+.supabase/**
+supabase/.env
+*.key
+*.pem
+*.p12
+
+### Logs ###
+*.log
+logs/
+
+### Build & runtime ###
+/.cache/
+.idea/**/workspace.xml
+out/
+/.DS_Store
+bin/
+
+### Java / Maven ###
+target/
+*.class
+**/.mvn/wrapper/maven-wrapper.jar
+
+### Spring Boot generated files ###
+spring.log
+
+### Node / frontend (if present) ###
+node_modules/
+**/dist/
+
+### IDE backups ###
+*.swp
+*.swo
+*.bak

@@ -91,7 +91,7 @@ public interface PetRepository extends JpaRepository<Pet, UUID> {
      * @param foundationId the foundation ID to filter by
      * @return list of pets belonging to the specified foundation
      */
-    List<Pet> findByFoundationId(UUID foundationId);
+    List<Pet> findByFoundation_Id(UUID foundationId);
 
     /**
      * Find all pets by foundation with pagination

@@ -117,14 +117,14 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     @Transactional(readOnly = true)
     public List<ContactMessage> findByFoundationId(UUID foundationId) {
         log.debug("Finding contact messages by foundation ID: {}", foundationId);
-        return contactMessageRepository.findByFoundationId(foundationId);
+        return contactMessageRepository.findByFoundation_Id(foundationId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ContactMessage> findByFoundationId(UUID foundationId, Pageable pageable) {
         log.debug("Finding contact messages by foundation ID with pagination: {}", foundationId);
-        return contactMessageRepository.findByFoundationId(foundationId, pageable);
+        return contactMessageRepository.findByFoundation_Id(foundationId, pageable);
     }
 
     @Override
@@ -215,14 +215,14 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     @Transactional(readOnly = true)
     public List<ContactMessage> findByFoundationIdAndIsRead(UUID foundationId, boolean isRead) {
         log.debug("Finding contact messages by foundation ID and read status: {} - {}", foundationId, isRead);
-        return contactMessageRepository.findByFoundationIdAndIsRead(foundationId, isRead);
+        return contactMessageRepository.findByFoundation_IdAndIsRead(foundationId, isRead);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ContactMessage> findByFoundationIdAndIsRead(UUID foundationId, boolean isRead, Pageable pageable) {
         log.debug("Finding contact messages by foundation ID and read status with pagination: {} - {}", foundationId, isRead);
-        return contactMessageRepository.findByFoundationIdAndIsRead(foundationId, isRead, pageable);
+        return contactMessageRepository.findByFoundation_IdAndIsRead(foundationId, isRead, pageable);
     }
 
     @Override
@@ -243,7 +243,7 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     @Transactional(readOnly = true)
     public Page<ContactMessage> findUnreadByFoundation(UUID foundationId, Pageable pageable) {
         log.debug("Finding unread contact messages by foundation ID: {}", foundationId);
-        return contactMessageRepository.findByFoundationIdAndIsReadFalse(foundationId, pageable);
+        return contactMessageRepository.findByFoundation_IdAndIsReadFalse(foundationId, pageable);
     }
 
     @Override
@@ -258,7 +258,7 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     public Page<ContactMessage> findRecentByFoundation(UUID foundationId, Pageable pageable) {
         log.debug("Finding recent contact messages by foundation ID: {}", foundationId);
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        return contactMessageRepository.findByFoundationIdAndCreatedAtAfter(foundationId, sevenDaysAgo, pageable);
+        return contactMessageRepository.findByFoundation_IdAndCreatedAtAfter(foundationId, sevenDaysAgo, pageable);
     }
 
     @Override
@@ -272,7 +272,7 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     @Transactional(readOnly = true)
     public long countByFoundationId(UUID foundationId) {
         log.debug("Counting contact messages by foundation ID: {}", foundationId);
-        return contactMessageRepository.countByFoundationId(foundationId);
+        return contactMessageRepository.countByFoundation_Id(foundationId);
     }
 
     @Override
@@ -280,9 +280,9 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     public long countByFoundationIdAndIsRead(UUID foundationId, boolean isRead) {
         log.debug("Counting contact messages by foundation ID and read status: {} - {}", foundationId, isRead);
         if (isRead) {
-            return contactMessageRepository.countByFoundationIdAndIsReadTrue(foundationId);
+            return contactMessageRepository.countByFoundation_IdAndIsReadTrue(foundationId);
         } else {
-            return contactMessageRepository.countByFoundationIdAndIsReadFalse(foundationId);
+            return contactMessageRepository.countByFoundation_IdAndIsReadFalse(foundationId);
         }
     }
 
@@ -290,14 +290,14 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     @Transactional(readOnly = true)
     public long countUnreadByFoundation(Foundation foundation) {
         log.debug("Counting unread contact messages by foundation: {}", foundation.getName());
-        return contactMessageRepository.countByFoundationIdAndIsReadFalse(foundation.getId());
+        return contactMessageRepository.countByFoundation_IdAndIsReadFalse(foundation.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
     public long countUnreadByFoundationId(UUID foundationId) {
         log.debug("Counting unread contact messages by foundation ID: {}", foundationId);
-        return contactMessageRepository.countByFoundationIdAndIsReadFalse(foundationId);
+        return contactMessageRepository.countByFoundation_IdAndIsReadFalse(foundationId);
     }
 
     @Override
@@ -325,7 +325,7 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     @Override
     public void deleteByFoundationId(UUID foundationId) {
         log.debug("Deleting contact messages by foundation ID: {}", foundationId);
-        contactMessageRepository.deleteByFoundationId(foundationId);
+        contactMessageRepository.deleteByFoundation_Id(foundationId);
     }
 
     @Override
@@ -354,17 +354,17 @@ public class ContactMessageServiceImpl implements ContactMessageService {
     public ContactMessageStatistics getStatisticsByFoundation(UUID foundationId) {
         log.debug("Getting contact message statistics for foundation ID: {}", foundationId);
         
-        long totalMessages = contactMessageRepository.countByFoundationId(foundationId);
-        long unreadMessages = contactMessageRepository.countByFoundationIdAndIsReadFalse(foundationId);
-        long readMessages = contactMessageRepository.countByFoundationIdAndIsReadTrue(foundationId);
+        long totalMessages = contactMessageRepository.countByFoundation_Id(foundationId);
+        long unreadMessages = contactMessageRepository.countByFoundation_IdAndIsReadFalse(foundationId);
+        long readMessages = contactMessageRepository.countByFoundation_IdAndIsReadTrue(foundationId);
         
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
         LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
         
-        long todayMessages = contactMessageRepository.countByFoundationIdAndCreatedAtAfter(foundationId, today);
-        long weekMessages = contactMessageRepository.countByFoundationIdAndCreatedAtAfter(foundationId, weekAgo);
-        long monthMessages = contactMessageRepository.countByFoundationIdAndCreatedAtAfter(foundationId, monthAgo);
+        long todayMessages = contactMessageRepository.countByFoundation_IdAndCreatedAtAfter(foundationId, today);
+        long weekMessages = contactMessageRepository.countByFoundation_IdAndCreatedAtAfter(foundationId, weekAgo);
+        long monthMessages = contactMessageRepository.countByFoundation_IdAndCreatedAtAfter(foundationId, monthAgo);
         
         return new ContactMessageStatistics(totalMessages, unreadMessages, readMessages, 
                                           todayMessages, weekMessages, monthMessages);

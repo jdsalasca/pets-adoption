@@ -25,9 +25,9 @@ public interface ContactMessageRepository extends JpaRepository<ContactMessage, 
 
     Page<ContactMessage> findByFoundation(Foundation foundation, Pageable pageable);
 
-    List<ContactMessage> findByFoundationId(UUID foundationId);
+    List<ContactMessage> findByFoundation_Id(UUID foundationId);
 
-    Page<ContactMessage> findByFoundationId(UUID foundationId, Pageable pageable);
+    Page<ContactMessage> findByFoundation_Id(UUID foundationId, Pageable pageable);
 
     List<ContactMessage> findBySenderEmail(String senderEmail);
 
@@ -49,23 +49,23 @@ public interface ContactMessageRepository extends JpaRepository<ContactMessage, 
 
     Page<ContactMessage> findByIsRead(boolean read, Pageable pageable);
 
-    List<ContactMessage> findByFoundationIdAndIsRead(UUID foundationId, boolean read);
+    List<ContactMessage> findByFoundation_IdAndIsRead(UUID foundationId, boolean read);
 
-    Page<ContactMessage> findByFoundationIdAndIsRead(UUID foundationId, boolean read, Pageable pageable);
+    Page<ContactMessage> findByFoundation_IdAndIsRead(UUID foundationId, boolean read, Pageable pageable);
 
-    List<ContactMessage> findByFoundationIdAndIsReadFalse(UUID foundationId);
+    List<ContactMessage> findByFoundation_IdAndIsReadFalse(UUID foundationId);
 
-    Page<ContactMessage> findByFoundationIdAndIsReadFalse(UUID foundationId, Pageable pageable);
+    Page<ContactMessage> findByFoundation_IdAndIsReadFalse(UUID foundationId, Pageable pageable);
 
     long countByFoundation(Foundation foundation);
 
-    long countByFoundationId(UUID foundationId);
+    long countByFoundation_Id(UUID foundationId);
 
-    long countByFoundationIdAndIsRead(UUID foundationId, boolean read);
+    long countByFoundation_IdAndIsRead(UUID foundationId, boolean read);
 
-    long countByFoundationIdAndIsReadFalse(UUID foundationId);
+    long countByFoundation_IdAndIsReadFalse(UUID foundationId);
 
-    long countByFoundationIdAndIsReadTrue(UUID foundationId);
+    long countByFoundation_IdAndIsReadTrue(UUID foundationId);
 
     long countByIsRead(boolean read);
 
@@ -75,13 +75,13 @@ public interface ContactMessageRepository extends JpaRepository<ContactMessage, 
 
     long countByCreatedAtAfter(LocalDateTime date);
 
-    long countByFoundationIdAndCreatedAtAfter(UUID foundationId, LocalDateTime date);
+    long countByFoundation_IdAndCreatedAtAfter(UUID foundationId, LocalDateTime date);
 
     Page<ContactMessage> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
-    Page<ContactMessage> findByFoundationIdAndCreatedAtAfter(UUID foundationId, LocalDateTime date, Pageable pageable);
+    Page<ContactMessage> findByFoundation_IdAndCreatedAtAfter(UUID foundationId, LocalDateTime date, Pageable pageable);
 
-    boolean existsByFoundationId(UUID foundationId);
+    boolean existsByFoundation_Id(UUID foundationId);
 
     /**
      * Deletes all contact messages for a specific foundation.
@@ -95,5 +95,5 @@ public interface ContactMessageRepository extends JpaRepository<ContactMessage, 
      *
      * @param foundationId the foundation ID
      */
-    void deleteByFoundationId(UUID foundationId);
+    void deleteByFoundation_Id(UUID foundationId);
 }

@@ -92,35 +92,35 @@ private final PetImageRepository petImageRepository;
     @Transactional(readOnly = true)
     public List<PetImage> findByPetId(UUID petId) {
         log.debug("Finding pet images by pet ID: {}", petId);
-        return petImageRepository.findByPetId(petId);
+        return petImageRepository.findByPet_Id(petId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<PetImage> findByPetId(UUID petId, Pageable pageable) {
         log.debug("Finding pet images by pet ID with pagination: {}", petId);
-        return petImageRepository.findByPetId(petId, pageable);
+        return petImageRepository.findByPet_Id(petId, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<PetImage> findPrimaryByPetId(UUID petId) {
         log.debug("Finding primary image for pet ID: {}", petId);
-        return petImageRepository.findByPetIdAndIsPrimaryTrue(petId);
+        return petImageRepository.findByPet_IdAndIsPrimaryTrue(petId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PetImage> findSecondaryByPetId(UUID petId) {
         log.debug("Finding secondary images for pet ID: {}", petId);
-        return petImageRepository.findByPetIdAndIsPrimaryFalse(petId);
+        return petImageRepository.findByPet_IdAndIsPrimaryFalse(petId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<PetImage> findSecondaryByPetId(UUID petId, Pageable pageable) {
         log.debug("Finding secondary images for pet ID with pagination: {}", petId);
-        return petImageRepository.findByPetIdAndIsPrimaryFalse(petId, pageable);
+        return petImageRepository.findByPet_IdAndIsPrimaryFalse(petId, pageable);
     }
 
     @Override
@@ -190,7 +190,7 @@ private final PetImageRepository petImageRepository;
     @Transactional(readOnly = true)
     public boolean hasPrimaryImage(UUID petId) {
         log.debug("Checking if pet has primary image: {}", petId);
-        return petImageRepository.existsByPetIdAndIsPrimaryTrue(petId);
+        return petImageRepository.existsByPet_IdAndIsPrimaryTrue(petId);
     }
 
     @Override
@@ -211,7 +211,7 @@ private final PetImageRepository petImageRepository;
     @Transactional(readOnly = true)
     public Optional<PetImage> findPrimaryImageByPetId(UUID petId) {
         log.debug("Finding primary image for pet ID: {}", petId);
-        return petImageRepository.findByPetIdAndIsPrimaryTrue(petId);
+        return petImageRepository.findByPet_IdAndIsPrimaryTrue(petId);
     }
 
     @Override
@@ -246,7 +246,7 @@ private final PetImageRepository petImageRepository;
     @Transactional(readOnly = true)
     public long countByPetId(UUID petId) {
         log.debug("Counting pet images for pet ID: {}", petId);
-        return petImageRepository.countByPetId(petId);
+        return petImageRepository.countByPet_Id(petId);
     }
 
     @Override
@@ -287,7 +287,7 @@ private final PetImageRepository petImageRepository;
     @Override
     public void deleteByPetId(UUID petId) {
         log.info("Deleting all images for pet ID: {}", petId);
-        petImageRepository.deleteByPetId(petId);
+        petImageRepository.deleteByPet_Id(petId);
         log.info("All images deleted successfully for pet ID: {}", petId);
     }
 
@@ -296,8 +296,8 @@ private final PetImageRepository petImageRepository;
     public PetImageStatistics getStatisticsByPet(UUID petId) {
         log.debug("Getting pet image statistics for pet ID: {}", petId);
         
-        long totalImages = petImageRepository.countByPetId(petId);
-        long primaryImages = petImageRepository.countByPetIdAndIsPrimaryTrue(petId);
+        long totalImages = petImageRepository.countByPet_Id(petId);
+        long primaryImages = petImageRepository.countByPet_IdAndIsPrimaryTrue(petId);
         
         return new PetImageStatistics(totalImages, primaryImages, 0L, totalImages);
     }

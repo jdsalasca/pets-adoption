@@ -115,26 +115,26 @@ public class AdoptionRequestServiceImpl implements AdoptionRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<AdoptionRequest> findByUserId(UUID userId) {
-        return adoptionRequestRepository.findByUserId(userId);
+    public List<AdoptionRequest> findByUserId(Long userId) {
+        return adoptionRequestRepository.findByUser_Id(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdoptionRequest> findByUserId(UUID userId, Pageable pageable) {
-        return adoptionRequestRepository.findByUserId(userId, pageable);
+    public Page<AdoptionRequest> findByUserId(Long userId, Pageable pageable) {
+        return adoptionRequestRepository.findByUser_Id(userId, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<AdoptionRequest> findByUserIdAndStatus(UUID userId, AdoptionRequestStatus status) {
-        return adoptionRequestRepository.findByUserIdAndStatus(userId, status);
+    public List<AdoptionRequest> findByUserIdAndStatus(Long userId, AdoptionRequestStatus status) {
+        return adoptionRequestRepository.findByUser_IdAndStatus(userId, status);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdoptionRequest> findByUserIdAndStatus(UUID userId, AdoptionRequestStatus status, Pageable pageable) {
-        return adoptionRequestRepository.findByUserIdAndStatus(userId, status, pageable);
+    public Page<AdoptionRequest> findByUserIdAndStatus(Long userId, AdoptionRequestStatus status, Pageable pageable) {
+        return adoptionRequestRepository.findByUser_IdAndStatus(userId, status, pageable);
     }
 
     @Override
@@ -152,25 +152,25 @@ public class AdoptionRequestServiceImpl implements AdoptionRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<AdoptionRequest> findByPetId(UUID petId) {
-        return adoptionRequestRepository.findByPetId(petId);
+        return adoptionRequestRepository.findByPet_Id(petId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<AdoptionRequest> findByPetId(UUID petId, Pageable pageable) {
-        return adoptionRequestRepository.findByPetId(petId, pageable);
+        return adoptionRequestRepository.findByPet_Id(petId, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<AdoptionRequest> findByPetIdAndStatus(UUID petId, AdoptionRequestStatus status) {
-        return adoptionRequestRepository.findByPetIdAndStatus(petId, status);
+        return adoptionRequestRepository.findByPet_IdAndStatus(petId, status);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<AdoptionRequest> findByPetIdAndStatus(UUID petId, AdoptionRequestStatus status, Pageable pageable) {
-        return adoptionRequestRepository.findByPetIdAndStatus(petId, status, pageable);
+        return adoptionRequestRepository.findByPet_IdAndStatus(petId, status, pageable);
     }
 
     @Override
@@ -229,14 +229,14 @@ public class AdoptionRequestServiceImpl implements AdoptionRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public long countByUserId(UUID userId) {
-        return adoptionRequestRepository.countByUserId(userId);
+    public long countByUserId(Long userId) {
+        return adoptionRequestRepository.countByUser_Id(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public long countByPetId(UUID petId) {
-        return adoptionRequestRepository.countByPetId(petId);
+        return adoptionRequestRepository.countByPet_Id(petId);
     }
 
     @Override
@@ -253,7 +253,7 @@ public class AdoptionRequestServiceImpl implements AdoptionRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean hasUserRequestedAdoption(UUID userId, UUID petId) {
+    public boolean hasUserRequestedAdoption(Long userId, UUID petId) {
         return adoptionRequestRepository.existsByUser_IdAndPet_Id(userId, petId);
     }
 
@@ -265,8 +265,8 @@ public class AdoptionRequestServiceImpl implements AdoptionRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean hasPendingRequests(UUID userId) {
-        return adoptionRequestRepository.countByUserIdAndStatus(userId, AdoptionRequestStatus.PENDING) > 0;
+    public boolean hasPendingRequests(Long userId) {
+        return adoptionRequestRepository.countByUser_IdAndStatus(userId, AdoptionRequestStatus.PENDING) > 0;
     }
 
     @Override
@@ -333,23 +333,23 @@ public class AdoptionRequestServiceImpl implements AdoptionRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public AdoptionRequestStatistics getStatisticsByUser(UUID userId) {
-        long total = adoptionRequestRepository.countByUserId(userId);
-        long pending = adoptionRequestRepository.countByUserIdAndStatus(userId, AdoptionRequestStatus.PENDING);
-        long approved = adoptionRequestRepository.countByUserIdAndStatus(userId, AdoptionRequestStatus.APPROVED);
-        long rejected = adoptionRequestRepository.countByUserIdAndStatus(userId, AdoptionRequestStatus.REJECTED);
-        long cancelled = adoptionRequestRepository.countByUserIdAndStatus(userId, AdoptionRequestStatus.CANCELLED);
+    public AdoptionRequestStatistics getStatisticsByUser(Long userId) {
+        long total = adoptionRequestRepository.countByUser_Id(userId);
+        long pending = adoptionRequestRepository.countByUser_IdAndStatus(userId, AdoptionRequestStatus.PENDING);
+        long approved = adoptionRequestRepository.countByUser_IdAndStatus(userId, AdoptionRequestStatus.APPROVED);
+        long rejected = adoptionRequestRepository.countByUser_IdAndStatus(userId, AdoptionRequestStatus.REJECTED);
+        long cancelled = adoptionRequestRepository.countByUser_IdAndStatus(userId, AdoptionRequestStatus.CANCELLED);
         return new AdoptionRequestStatistics(total, pending, approved, rejected, cancelled);
     }
 
     @Override
     @Transactional(readOnly = true)
     public AdoptionRequestStatistics getStatisticsByPet(UUID petId) {
-        long total = adoptionRequestRepository.countByPetId(petId);
-        long pending = adoptionRequestRepository.countByPetIdAndStatus(petId, AdoptionRequestStatus.PENDING);
-        long approved = adoptionRequestRepository.countByPetIdAndStatus(petId, AdoptionRequestStatus.APPROVED);
-        long rejected = adoptionRequestRepository.countByPetIdAndStatus(petId, AdoptionRequestStatus.REJECTED);
-        long cancelled = adoptionRequestRepository.countByPetIdAndStatus(petId, AdoptionRequestStatus.CANCELLED);
+        long total = adoptionRequestRepository.countByPet_Id(petId);
+        long pending = adoptionRequestRepository.countByPet_IdAndStatus(petId, AdoptionRequestStatus.PENDING);
+        long approved = adoptionRequestRepository.countByPet_IdAndStatus(petId, AdoptionRequestStatus.APPROVED);
+        long rejected = adoptionRequestRepository.countByPet_IdAndStatus(petId, AdoptionRequestStatus.REJECTED);
+        long cancelled = adoptionRequestRepository.countByPet_IdAndStatus(petId, AdoptionRequestStatus.CANCELLED);
         return new AdoptionRequestStatistics(total, pending, approved, rejected, cancelled);
     }
 }

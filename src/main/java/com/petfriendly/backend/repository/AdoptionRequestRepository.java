@@ -27,17 +27,17 @@ public interface AdoptionRequestRepository extends JpaRepository<AdoptionRequest
 
     Page<AdoptionRequest> findByUser(User user, Pageable pageable);
 
-    List<AdoptionRequest> findByUserId(UUID userId);
+    List<AdoptionRequest> findByUser_Id(Long userId);
 
-    Page<AdoptionRequest> findByUserId(UUID userId, Pageable pageable);
+    Page<AdoptionRequest> findByUser_Id(Long userId, Pageable pageable);
 
     List<AdoptionRequest> findByPet(Pet pet);
 
     Page<AdoptionRequest> findByPet(Pet pet, Pageable pageable);
 
-    List<AdoptionRequest> findByPetId(UUID petId);
+    List<AdoptionRequest> findByPet_Id(UUID petId);
 
-    Page<AdoptionRequest> findByPetId(UUID petId, Pageable pageable);
+    Page<AdoptionRequest> findByPet_Id(UUID petId, Pageable pageable);
 
     List<AdoptionRequest> findByStatus(AdoptionRequestStatus status);
 
@@ -45,15 +45,15 @@ public interface AdoptionRequestRepository extends JpaRepository<AdoptionRequest
 
     List<AdoptionRequest> findByUserAndStatus(User user, AdoptionRequestStatus status);
 
-    List<AdoptionRequest> findByUserIdAndStatus(UUID userId, AdoptionRequestStatus status);
+    List<AdoptionRequest> findByUser_IdAndStatus(Long userId, AdoptionRequestStatus status);
 
-    Page<AdoptionRequest> findByUserIdAndStatus(UUID userId, AdoptionRequestStatus status, Pageable pageable);
+    Page<AdoptionRequest> findByUser_IdAndStatus(Long userId, AdoptionRequestStatus status, Pageable pageable);
 
     List<AdoptionRequest> findByPetAndStatus(Pet pet, AdoptionRequestStatus status);
 
-    List<AdoptionRequest> findByPetIdAndStatus(UUID petId, AdoptionRequestStatus status);
+    List<AdoptionRequest> findByPet_IdAndStatus(UUID petId, AdoptionRequestStatus status);
 
-    Page<AdoptionRequest> findByPetIdAndStatus(UUID petId, AdoptionRequestStatus status, Pageable pageable);
+    Page<AdoptionRequest> findByPet_IdAndStatus(UUID petId, AdoptionRequestStatus status, Pageable pageable);
 
     Optional<AdoptionRequest> findByUserAndPet(User user, Pet pet);
 
@@ -92,19 +92,19 @@ public interface AdoptionRequestRepository extends JpaRepository<AdoptionRequest
 
     long countByPet(Pet pet);
 // Count methods
-    long countByUserId(UUID userId);
+    long countByUser_Id(Long userId);
 
-    long countByPetId(UUID petId);
+    long countByPet_Id(UUID petId);
 
-    long countByUserIdAndStatus(UUID userId, AdoptionRequestStatus status);
+    long countByUser_IdAndStatus(Long userId, AdoptionRequestStatus status);
 
-    long countByPetIdAndStatus(UUID petId, AdoptionRequestStatus status);
+    long countByPet_IdAndStatus(UUID petId, AdoptionRequestStatus status);
 
     boolean existsByUserAndPet(User user, Pet pet);
 
     boolean existsByUserAndStatus(User user, AdoptionRequestStatus status);
 
-    boolean existsByUser_IdAndPet_Id(UUID userId, UUID petId);
+    boolean existsByUser_IdAndPet_Id(Long userId, UUID petId);
 
     @Query("SELECT ar FROM AdoptionRequest ar ORDER BY ar.createdAt DESC")
     Page<AdoptionRequest> findRecentAdoptionRequests(Pageable pageable);

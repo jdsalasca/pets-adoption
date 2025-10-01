@@ -22,7 +22,6 @@ public interface FoundationRepository extends JpaRepository<Foundation, UUID> {
 
     Optional<Foundation> findByName(String name);
 
-    Optional<Foundation> findByEmail(String contactEmail);
 
     List<Foundation> findByCity(String city);
 
