@@ -101,6 +101,9 @@ public class SecurityConfig {
             // Configure exception handling
             .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             
+            // Ensure our DaoAuthenticationProvider is registered
+            .authenticationProvider(authenticationProvider())
+            
             // Configure authorization rules
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints - no authentication required

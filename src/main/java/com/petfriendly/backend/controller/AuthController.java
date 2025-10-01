@@ -70,11 +70,12 @@ public class AuthController {
         }
 
         // Create new user account
+        // Build user with raw password; service layer will handle encoding
         User user = User.builder()
             .firstName(registerRequest.getFirstName())
             .lastName(registerRequest.getLastName())
             .email(registerRequest.getEmail())
-            .password(passwordEncoder.encode(registerRequest.getPassword()))
+            .password(registerRequest.getPassword())
             .phone(registerRequest.getPhone())
             .city(registerRequest.getCity())
             .role(Role.USER)
@@ -99,11 +100,12 @@ public class AuthController {
         }
 
         // Create new foundation account
+        // Build foundation admin with raw password; service layer will handle encoding
         User user = User.builder()
             .firstName(registerRequest.getFirstName())
             .lastName(registerRequest.getLastName())
             .email(registerRequest.getEmail())
-            .password(passwordEncoder.encode(registerRequest.getPassword()))
+            .password(registerRequest.getPassword())
             .phone(registerRequest.getPhone())
             .city(registerRequest.getCity())
             .role(Role.FOUNDATION_ADMIN)
